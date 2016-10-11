@@ -9,71 +9,79 @@ var svg = d3.select("svg"),
     width = +svg.attr("width"),
     height = +svg.attr("height"),
     g = svg.append("g").attr("transform", "translate(32," + (height / 2) + ")");
-var height = 50;
+var dataset = []
+d3.csv("rca.csv", function(data) {
+   dataset = data.map(function(d) { return  [d["Title"], d["Genre"], d["P1"], d["P2"]]; });
+   console.log(dataset)
+});
+var height = 30;
 var width = 100;
-svg.append("rect")
-   .attr("height",height)
-   .attr("width",width)
-   .attr("fill","#ccc")
-   .attr("id","rect1")
-   .attr("stroke","black")
-   .attr("class", "w1")
-   .attr("x",100)
-   .attr("y",100)
-   .attr("rx",15)
-   .attr("ry",15)
-   .on("mouseover", function(d,i) {
-	   d3.selectAll(".w1")
-		 .attr("stroke","red")
-		 .attr("stroke-width","2px")
-   })
-   .on("mouseout", function(d,i) {
-	   d3.selectAll(".w1")
-	     .attr("stroke","black")
-		 .attr("stroke-width","1px")
-   })
-svg.append("text")
-   .data(textData)
-   .attr("x",100 + 10)
-   .attr("y",100 + 20)
-   .text(function(d) { return d; })
-   .style("font-size","12px");
-   
-/*var xx = d3.select("#rect1").attr("x");
-var yy = d3.select("#rect1").attr("y");
-var x1 = d3.select("#rect2").attr("x");
-var y1 = d3.select("#rect2").attr("y");
-var curveData = [{x: xx,y:yy},{x:x1,y:y1}];*/
 
 
 
-svg.append("rect")
-   .attr("height",height)
-   .attr("width",width)
-   .attr("fill","#ccc")
-   .attr("id","rect2")
-   .attr("class","w1")
-   .attr("stroke","black")
-   .attr("x",300)
-   .attr("y",200)
-   .attr("rx",15)
-   .attr("ry",15)
-   .on("mouseover", function(d,i) {
-	   d3.selectAll(".w1")
-		 .attr("stroke","red")
-		 .attr("stroke-width","2px")
-   })
-   .on("mouseout", function(d,i) {
-	   d3.selectAll(".w1")
-	     .attr("stroke","black")
-		 .attr("stroke-width","1px")
-   })
+for (var j = 0; j < 10; j++) {
+	//var str = ".w" + j;
+	svg.append("rect")
+	   .attr("height",height)
+	   .attr("width",width)
+	   .attr("fill","#ccc")
+	   .attr("id","rect1")
+	   .attr("stroke","black")
+	   .attr("class", "w"+j)
+	   .attr("x",100)
+	   .attr("y",10+j*height)
+	   .attr("rx",5)
+	   .attr("ry",5)
+	   .on("mouseover", function() {
+		   c = "." + d3.select(this).attr("class");
+		   d3.selectAll(c)
+			 .attr("stroke","red")
+			 .attr("stroke-width","2px")
+	   })
+	   .on("mouseout", function() {
+		   c = "." + d3.select(this).attr("class");
+		   //console.log(c);
+		   d3.selectAll(c)
+			 .attr("stroke","black")
+			 .attr("stroke-width","1px")
+	   })
+	svg.append("text")
+	   .data(textData)
+	   .attr("x",100 + 10)
+	   .attr("y",10+j*height + 20)
+	   .text(function(d) { return d; })
+	   .style("font-size","12px");
 
-var curveData = [ {x:190,y:100},{x:360,  y:150}];
-svg.append("path")
-   .datum(curveData)
-   .attr("class", "w1")
-   .attr("id","link1")
-   .attr("d", diagonal)
-   .attr("stroke", "#444")
-   .attr("fill","none")
+	/*svg.append("rect")
+	   .attr("height",height)
+	   .attr("width",width)
+	   .attr("fill","#ccc")
+	   .attr("id","rect2")
+	   .attr("class","w"+j)
+	   .attr("stroke","black")
+	   .attr("x",300)
+	   .attr("y",10+j*height)
+	   .attr("rx",5)
+	   .attr("ry",5)
+	   .on("mouseover", function() {
+		   c = "." + d3.select(this).attr("class");
+		   d3.selectAll(c)
+			 .attr("stroke","red")
+			 .attr("stroke-width","2px")
+	   })
+	   .on("mouseout", function() {
+		   c = "." + d3.select(this).attr("class");
+		   d3.selectAll(c)
+			 .attr("stroke","black")
+			 .attr("stroke-width","1px")
+	   })*/
+
+	var curveData = [ {x:100+width,y:10+j*height+0.5*height},{x:300,  y:10+j*height}];
+	svg.append("path")
+	   .datum(curveData)
+	   .attr("class", "w"+j)
+	   .attr("id","link1")
+	   .attr("d", diagonal)
+	   .attr("stroke", "#444")
+	   .attr("fill","none")
+}
