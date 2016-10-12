@@ -13,32 +13,57 @@ var svg = d3.select("svg"),
     g = svg.append("g").attr("transform", "translate(32," + (height / 2) + ")");
 
 var dataset = [];
+var genreColor = {};
 
 // box size for each element
-var height = 30;
-var width = 100;
+var height = 20;
+var width = 150;
 
-d3.csv("shak-exp.csv", function(data) {
-   dataset = data.map(function(d) { return  [d["Title"], d["Genre"], d["P1"], d["P2"]]; });
-   // console.log(dataset);
+function compare(a,b) {
+  if (Number(a[3]) > Number(b[3]))
+    return -1;
+  if (Number(a[3]) < Number(b[3]))
+    return 1;
+  return 0;
+}
+
+d3.csv("00-comedies.csv", function(data) {
+   dataset = data.map(function(d) { return  [d["Item"], d["genre"], d["predicate"], d["explainer1"]]; });
+   dataset.sort(compare);
+   max = Number(dataset[dataset.length-1][3]);
+   min = Number(dataset[0][3]);
+   h1 = max - min;
+   h2 = height * dataset.length;
+   // 0 -- map to max
+   // height * dataset.length -- map to min
+   //console.log(dataset);
+   k = 0;
+   for (var j = 0; j < dataset.length; j++) {
+	   //console.log(dataset[j][1]);
+	   if (!(dataset[j][1] in genreColor)) {
+		   genreColor[dataset[j][1]] = colors[k];
+		   //console.log(dataset[j][1]);
+		   k++;
+	   }
+   }
    // sort data by p1 and p2
    for(var j = 0; j < dataset.length; j++) {
 	   svg.append("rect")
 	   .attr("height",height)
 	   .attr("width",width)
-	   .attr("fill",colors[0])
-	   .attr("id","rect1")
+	   .attr("fill",genreColor[dataset[j][1]])
+	   .attr("id","sq"+j)
 	   .attr("stroke","black")
 	   .attr("class", "w"+j)
-	   .attr("x",100)
-	   .attr("y",10+j*height)
+	   .attr("x",10)
+	   .attr("y",j*height)
 	   .attr("rx",5)
 	   .attr("ry",5)
 	   .on("mouseover", function() {
 		   c = "." + d3.select(this).attr("class");
 		   d3.selectAll(c)
 			 .attr("stroke","red")
-			 .attr("stroke-width","2px")
+			 .attr("stroke-width","4px")
 	   })
 	   .on("mouseout", function() {
 		   c = "." + d3.select(this).attr("class");
@@ -49,91 +74,41 @@ d3.csv("shak-exp.csv", function(data) {
 	   //var t = wrap(dataset[j][0],width);
 	   //console.log(t);
 	   svg.append("text")
-	   .attr("x",100 + 10)
-	   .attr("y",10+j*height + 20)
-	   .text(dataset[j][0])
-	   .style("font-size","12px");
+		  .attr("x",10 + 5)
+		  .attr("y",15+j*height)
+		  .text(dataset[j][0])
+		  .style("font-size","12px");
 	   
 	   // this part is the lines
-	   /*var curveData = [ {x:100+width,y:10+j*height+0.5*height},{x:300,  y:10+j*height}];
+	   y_new = (Number(dataset[j][3]) - min) / h1 * h2;
+	   var curveData = [ {x:10+width,y:j*height+0.5*height},{x:300,  y:y_new}];
 		svg.append("path")
 		   .datum(curveData)
 		   .attr("class", "w"+j)
-		   .attr("id","link1")
+		   .attr("id",dataset[j][1])
 		   .attr("d", diagonal)
-		   .attr("stroke", colors[0])
-		   .attr("fill","none")*/
+		   .attr("stroke", genreColor[dataset[j][1]])
+		   .attr("fill","none")
    }
-   
+   /*var y = d3.scale.ordinal()
+    .rangeRoundBands([height, 0], .1); // y becomes ordinal
+
+	var x = d3.scale.linear()
+		.rangeRound([0, width]); // x becomes linear
+
+	// change state group to be positioned in the y now instead of x
+	var state = svg.selectAll(".state")
+		  .data(data)
+		  .enter().append("g")
+		  .attr("class", "g")
+		  .attr("transform", function(d) { return "translate(0," + y(d.State) + ")"; });
+
+	// rect calculations become
+	 state.selectAll("rect")
+		.data(function(d) { return d.ages; })
+		.enter().append("rect")
+		.attr("height", y.rangeBand()) // height in now the rangeband
+		.attr("x", function(d) { return x(d.y0); }) // this is the horizontal position in the stack
+		.attr("width", function(d) { return x(d.y1) - x(d.y0); }) // this is the horizontal "height" of the bar
+		.style("fill", function(d) { return color(d.name); });*/
 });
-
-
-
-/*
-console.log(dataset);
-
-for (var j = 0; j < dataset.length; j++) {
-	svg.append("rect")
-	   .attr("height",height)
-	   .attr("width",width)
-	   .attr("fill",colors[0])
-	   .attr("id","rect1")
-	   .attr("stroke","black")
-	   .attr("class", "w"+j)
-	   .attr("x",100)
-	   .attr("y",10+j*height)
-	   .attr("rx",5)
-	   .attr("ry",5)
-	   .on("mouseover", function() {
-		   c = "." + d3.select(this).attr("class");
-		   d3.selectAll(c)
-			 .attr("stroke","red")
-			 .attr("stroke-width","2px")
-	   })
-	   .on("mouseout", function() {
-		   c = "." + d3.select(this).attr("class");
-		   //console.log(c);
-		   d3.selectAll(c)
-			 .attr("stroke","black")
-			 .attr("stroke-width","1px")
-	   })
-	svg.append("text")
-	   .data(textData)
-	   .attr("x",100 + 10)
-	   .attr("y",10+j*height + 20)
-	   .text(function(d) { return d; })
-	   .style("font-size","12px");
-
-	/*svg.append("rect")
-	   .attr("height",height)
-	   .attr("width",width)
-	   .attr("fill","#ccc")
-	   .attr("id","rect2")
-	   .attr("class","w"+j)
-	   .attr("stroke","black")
-	   .attr("x",300)
-	   .attr("y",10+j*height)
-	   .attr("rx",5)
-	   .attr("ry",5)
-	   .on("mouseover", function() {
-		   c = "." + d3.select(this).attr("class");
-		   d3.selectAll(c)
-			 .attr("stroke","red")
-			 .attr("stroke-width","2px")
-	   })
-	   .on("mouseout", function() {
-		   c = "." + d3.select(this).attr("class");
-		   d3.selectAll(c)
-			 .attr("stroke","black")
-			 .attr("stroke-width","1px")
-	   })*/
-
-	/*var curveData = [ {x:100+width,y:10+j*height+0.5*height},{x:300,  y:10+j*height}];
-	svg.append("path")
-	   .datum(curveData)
-	   .attr("class", "w"+j)
-	   .attr("id","link1")
-	   .attr("d", diagonal)
-	   .attr("stroke", "#444")
-	   .attr("fill","none")
-}*/
