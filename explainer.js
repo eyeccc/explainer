@@ -29,6 +29,51 @@ function compare(a,b) {
   return 0;
 }
 
+function boxplot(svg, color, info, x_pos, h1, h2, max, min) {
+	svg.append("rect")
+	   .attr("height",Math.abs((info.Q3 - info.Q2)/ h1 * h2))
+	   .attr("width",20)
+	   .attr("fill",color)
+	   .attr("stroke","black")
+	   .attr("x",x_pos)
+	   .attr("y",h2 - ((info.Q3 - max)/ (-h1) * h2)) 
+	svg.append("rect")
+	   .attr("height",Math.abs((info.Q2 - info.Q1)/ h1 * h2))
+	   .attr("width",20)
+	   .attr("fill",color)
+	   .attr("stroke","black")
+	   .attr("x",x_pos)
+	   .attr("y",h2 - ((info.Q2 - max)/ (-h1) * h2))
+	svg.append("line")
+	   .attr("x1",x_pos)
+	   .attr("y1",h2 - ((info.min_val - max)/ (-h1) * h2))
+	   .attr("x2",x_pos + 20)
+	   .attr("y2",h2 - ((info.min_val - max)/ (-h1) * h2))
+	   .attr("stroke-width", 2)
+       .attr("stroke", "black")
+	svg.append("line")
+	   .attr("x1",x_pos)
+	   .attr("y1",h2-((info.max_val - max)/ (-h1) * h2))
+	   .attr("x2",x_pos+20)
+	   .attr("y2",h2-((info.max_val - max)/ (-h1) * h2))
+	   .attr("stroke-width", 2)
+       .attr("stroke", "black")
+	svg.append("line")
+	   .attr("x1",x_pos+10)
+	   .attr("y1",h2 - ((info.max_val - max)/ (-h1) * h2))
+	   .attr("x2",x_pos+10)
+	   .attr("y2",h2 - ((info.max_val - max)/ (-h1) * h2) + Math.abs((info.max_val - info.Q3)/ h1 * h2))
+	   .attr("stroke-width", 1)
+       .attr("stroke", "black")
+	svg.append("line")
+	   .attr("x1",x_pos+10)
+	   .attr("y1",h2 - ((info.Q1 - max)/ (-h1) * h2))
+	   .attr("x2",x_pos+10)
+	   .attr("y2",h2 - ((info.Q1 - max)/ (-h1) * h2) + Math.abs((info.Q1 - info.min_val)/ h1 * h2))
+	   .attr("stroke-width", 1)
+       .attr("stroke", "black")
+}
+
 d3.csv("00-comedies.csv", function(data) {
    dataset = data.map(function(d) { return  [d["Item"], d["genre"], d["predicate"], d["explainer1"]]; });
    // sort data by p value
@@ -94,11 +139,58 @@ d3.csv("00-comedies.csv", function(data) {
    }
    
    // draw histogram
-   // looks incorrect...
    var box_h = h2 / 7; // num of bins, might need to change it to user input
-   histData = data.map(function(i){ return i.explainer1; });
+   var st = genreColor;
+   for(var prop in st) {
+	   st[prop] = 0;
+   }
+   var count = 1;
+   // max to min
+   for (var j = dataset.length -1; j >= 0; j--) {
+	   if (Number(dataset[j][3]) <= max + Math.abs(h1*count / 7) ) {
+		  // console.log("test");
+		   st[dataset[j][1]] += 1;
+	   /*} else if (Number(dataset[j][3]) === max ) {
+		   st[dataset[j][1]] += 1;*/
+	   } else {
+		   var u = 0;
+		   var l = 0;
+		   for(var prop in st) {
+			   svg.append("rect")
+				.attr("x", 300 + u*10) // fixed position for now
+				.attr("y", (7-(count))*box_h)
+				.attr("width", st[prop]*10)
+				.attr("height", box_h)
+				.attr("stroke","green")
+				.attr("fill", colors[l]);
+				u += st[prop];
+				l++;
+		   }
+		   for(var prop in st) {
+			   st[prop] = 0;
+		   }
+		   count++;
+		   j++;
+	   }
+   }
+   var u = 0;
+   var l = 0;
+	for(var prop in st) {
+		svg.append("rect")
+			.attr("x", 300 + u*10) // fixed position for now
+			.attr("y", (7-(count))*box_h)
+			.attr("width", st[prop]*10)
+			.attr("height", box_h)
+			.attr("stroke","green")
+			.attr("fill", colors[l]);
+			u += st[prop];
+			l++;
+	}
+   //console.log(st);
+   /*histData = data.map(function(i){ return i.explainer1; });
    var histogram = d3.layout.histogram()
 					 .bins(7)(histData);
+	console.log(histogram);
 	histogram.reverse();
    
    var bars = svg.selectAll(".bar")
@@ -110,7 +202,7 @@ d3.csv("00-comedies.csv", function(data) {
 		.attr("y", function(d,i){ return i*box_h; })
 		.attr("width", function(d){ return d.y*10 })
 		.attr("height", box_h)
-		.attr("fill", "steelblue")
+		.attr("fill", "steelblue")*/
 		
 	// draw box plot, +1 / -1 / all
 	var positive = [];
@@ -130,8 +222,7 @@ d3.csv("00-comedies.csv", function(data) {
 	var n1 = negative.map(Number);
 	all_val.sort(compare);
 	var a1 = all_val.map(Number);
-	// from small to large
-	//console.log(positive);
+	// this part is ugly...
 	var p_info = {
 		max_val: p1[0],
 		Q3: p1[Math.floor(p1.length * 1 / 4)],
@@ -139,7 +230,7 @@ d3.csv("00-comedies.csv", function(data) {
 		Q1: p1[Math.floor(p1.length * 3 / 4)],
 		min_val: p1[p1.length - 1],
 	};
-
+	boxplot(svg, colors[0], p_info, 500, h1, h2, max, min);
 	var n_info = {
 		max_val: n1[0],
 		Q3: n1[Math.floor(n1.length * 1 / 4)],
@@ -147,6 +238,7 @@ d3.csv("00-comedies.csv", function(data) {
 		Q1: n1[Math.floor(n1.length * 3 / 4)],
 		min_val: n1[n1.length -1],
 	};
+	boxplot(svg, colors[2], n_info, 470, h1, h2, max, min);
 	var a_info = {
 		max_val: a1[0],
 		Q3: a1[Math.floor(a1.length * 1 / 4)],
@@ -154,135 +246,6 @@ d3.csv("00-comedies.csv", function(data) {
 		Q1: a1[Math.floor(a1.length * 3 / 4)],
 		min_val: a1[a1.length -1],
 	};
-    // let's start from x = 500
-	svg.append("rect")
-	   .attr("height",Math.abs((p_info.Q3 - p_info.Q2)/ h1 * h2))
-	   .attr("width",20)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",500)
-	   .attr("y",h2 - ((p_info.Q3 - max)/ (-h1) * h2)) //(p_info.Q3 - min)/ h1 * h2
-	svg.append("rect")
-	   .attr("height",Math.abs((p_info.Q2 - p_info.Q1)/ h1 * h2))
-	   .attr("width",20)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",500)
-	   .attr("y",h2 - ((p_info.Q2 - max)/ (-h1) * h2))
-	svg.append("rect")
-	   .attr("height",1)
-	   .attr("width",20)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",500)
-	   .attr("y",h2 - ((p_info.min_val - max)/ (-h1) * h2))
-	svg.append("rect")
-	   .attr("height",1)
-	   .attr("width",20)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",500)
-	   .attr("y",h2-((p_info.max_val - max)/ (-h1) * h2))
-	svg.append("rect")
-	   .attr("height",Math.abs((p_info.max_val - p_info.Q3)/ h1 * h2))
-	   .attr("width",1)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",510)
-	   .attr("y",h2 - ((p_info.max_val - max)/ (-h1) * h2))
-	svg.append("rect")
-	   .attr("height",Math.abs((p_info.Q1 - p_info.min_val)/ h1 * h2))
-	   .attr("width",1)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",510)
-	   .attr("y",h2 - ((p_info.Q1 - max)/ (-h1) * h2))
-	   
-	// let's start from x = 470
-	svg.append("rect")
-	   .attr("height",Math.abs((n_info.Q3 - n_info.Q2)/ h1 * h2))
-	   .attr("width",20)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",470)
-	   .attr("y",h2 - ((n_info.Q3 - max)/ (-h1) * h2)) //(p_info.Q3 - min)/ h1 * h2
-	svg.append("rect")
-	   .attr("height",Math.abs((n_info.Q2 - n_info.Q1)/ h1 * h2))
-	   .attr("width",20)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",470)
-	   .attr("y",h2 - ((n_info.Q2 - max)/ (-h1) * h2))
-	svg.append("rect")
-	   .attr("height",1)
-	   .attr("width",20)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",470)
-	   .attr("y",h2 - ((n_info.min_val - max)/ (-h1) * h2))
-	svg.append("rect")
-	   .attr("height",1)
-	   .attr("width",20)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",470)
-	   .attr("y",h2-((n_info.max_val - max)/ (-h1) * h2))
-	svg.append("rect")
-	   .attr("height",Math.abs((n_info.max_val - n_info.Q3)/ h1 * h2))
-	   .attr("width",1)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",480)
-	   .attr("y",h2 - ((n_info.max_val - max)/ (-h1) * h2))
-	svg.append("rect")
-	   .attr("height",Math.abs((n_info.Q1 - n_info.min_val)/ h1 * h2))
-	   .attr("width",1)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",480)
-	   .attr("y",h2 - ((n_info.Q1 - max)/ (-h1) * h2))
-	// let's start from x = 440
-	svg.append("rect")
-	   .attr("height",Math.abs((a_info.Q3 - a_info.Q2)/ h1 * h2))
-	   .attr("width",20)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",440)
-	   .attr("y",h2 - ((a_info.Q3 - max)/ (-h1) * h2)) //(p_info.Q3 - min)/ h1 * h2
-	svg.append("rect")
-	   .attr("height",Math.abs((a_info.Q2 - a_info.Q1)/ h1 * h2))
-	   .attr("width",20)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",440)
-	   .attr("y",h2 - ((a_info.Q2 - max)/ (-h1) * h2))
-	svg.append("rect")
-	   .attr("height",1)
-	   .attr("width",20)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",440)
-	   .attr("y",h2 - ((a_info.min_val - max)/ (-h1) * h2))
-	svg.append("rect")
-	   .attr("height",1)
-	   .attr("width",20)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",440)
-	   .attr("y",h2-((a_info.max_val - max)/ (-h1) * h2))
-	svg.append("rect")
-	   .attr("height",Math.abs((a_info.max_val - a_info.Q3)/ h1 * h2))
-	   .attr("width",1)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",450)
-	   .attr("y",h2 - ((a_info.max_val - max)/ (-h1) * h2))
-	svg.append("rect")
-	   .attr("height",Math.abs((a_info.Q1 - a_info.min_val)/ h1 * h2))
-	   .attr("width",1)
-	   .attr("fill","blue")
-	   .attr("stroke","black")
-	   .attr("x",450)
-	   .attr("y",h2 - ((a_info.Q1 - max)/ (-h1) * h2))
+	boxplot(svg, colors[1], a_info, 440, h1, h2, max, min);
 
 });
