@@ -94,11 +94,12 @@ d3.csv("00-comedies.csv", function(data) {
    }
    
    // draw histogram
+   // looks incorrect...
+   var box_h = h2 / 7; // num of bins, might need to change it to user input
    histData = data.map(function(i){ return i.explainer1; });
    var histogram = d3.layout.histogram()
-					 .bins(7)(histData)
-
-   var box_h = h2 / 7; // num of bins, might need to change it to user input
+					 .bins(7)(histData);
+   
    var bars = svg.selectAll(".bar")
 				 .data(histogram)
 				 .enter()
@@ -106,8 +107,78 @@ d3.csv("00-comedies.csv", function(data) {
 	bars.append("rect")
 		.attr("x", function(d){ return 300; }) // fixed position for now
 		.attr("y", function(d,i){ return i*box_h; })
-		.attr("width", function(d){ return d.y*10 })
+		.attr("width", function(d){ return d.y*5 })
 		.attr("height", box_h)
 		.attr("fill", "steelblue")
-    
+		
+	// draw box plot, +1 / -1 / all
+	var positive = [];
+	var negative = [];
+	var all_val = [];
+	for (var j = 0;j<dataset.length; j++) {
+		if (Number(dataset[j][2]) > 0) {
+			positive.push(Number(dataset[j][3]));
+		} else {
+			negative.push(Number(dataset[j][3]));
+		}
+		all_val.push(Number(dataset[j][3]));
+	}
+	positive.sort();
+	negative.sort();
+	all_val.sort();
+	// from small to large
+	//console.log(positive);
+	var p_info = {
+		max_val: positive[positive.length -1],
+		Q3: positive[Math.floor(positive.length * 3 / 4)],
+		Q2: positive[Math.floor(positive.length * 1 / 2)],
+		Q1: positive[Math.floor(positive.length * 1 / 4)],
+		min_val: positive[0],
+	};
+	//console.log(p_info);
+	var n_info = {
+		max_val: negative[negative.length -1],
+		Q3: negative[Math.floor(negative.length * 3 / 4)],
+		Q2: negative[Math.floor(negative.length * 1 / 2)],
+		Q1: negative[Math.floor(negative.length * 1 / 4)],
+		min_val: negative[0],
+	};
+	var all_info = {
+		max_val: all_val[all_val.length -1],
+		Q3: all_val[Math.floor(all_val.length * 3 / 4)],
+		Q2: all_val[Math.floor(all_val.length * 1 / 2)],
+		Q1: all_val[Math.floor(all_val.length * 1 / 4)],
+		min_val: all_val[0],
+	};
+    // let's start from x = 400
+	// coordinate transformation is wrong...
+	svg.append("rect")
+	   .attr("height",Math.abs((p_info.Q3 - p_info.Q2)/ h1 * h2))
+	   .attr("width",20)
+	   .attr("fill","blue")
+	   .attr("stroke","black")
+	   .attr("x",400)
+	   .attr("y",(p_info.Q3 - min)/ h1 * h2) //(p_info.Q3 - min)/ h1 * h2
+	svg.append("rect")
+	   .attr("height",Math.abs((p_info.Q2 - p_info.Q1)/ h1 * h2))
+	   .attr("width",20)
+	   .attr("fill","blue")
+	   .attr("stroke","black")
+	   .attr("x",400)
+	   .attr("y",(p_info.Q2 - min)/ h1 * h2)
+	svg.append("rect")
+	   .attr("height",1)
+	   .attr("width",20)
+	   .attr("fill","blue")
+	   .attr("stroke","black")
+	   .attr("x",400)
+	   .attr("y",(p_info.min_val - min)/ h1 * h2)
+	svg.append("rect")
+	   .attr("height",1)
+	   .attr("width",20)
+	   .attr("fill","blue")
+	   .attr("stroke","black")
+	   .attr("x",400)
+	   .attr("y",(p_info.max_val - min)/ h1 * h2)
+
 });
