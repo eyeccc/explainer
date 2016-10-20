@@ -224,6 +224,18 @@ function boxdata(svg, dataset,x_position, pred) {
 	boxplot(svg, colors[1], a_info, x_position+440, h1, h2, max, min);
 }
 
+
+
+document.addEventListener("DOMContentLoaded", function (event) {
+    var _selector = document.querySelector('input[name=linecheck]');
+    _selector.addEventListener('change', function (event) {
+        if (_selector.checked) {
+            document.getElementById("myDiv").style.backgroundColor = "red";
+        } else {
+            document.getElementById("myDiv").style.backgroundColor = "blue";
+        }
+    });
+
 // main function
 d3.csv("00-comedies.csv", function(data) {
    // get column name
