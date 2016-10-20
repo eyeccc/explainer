@@ -22,14 +22,16 @@ var width = 150;
 
 // helper function to sort the dataset by its p value
 function compare(a,b) {
-  if (Number(a[3]) > Number(b[3]))
+  var last = a.length - 1;
+  if (Number(a[last]) > Number(b[last]))
     return -1;
-  if (Number(a[3]) < Number(b[3]))
+  if (Number(a[last]) < Number(b[last]))
     return 1;
   return 0;
 }
 
 function stackbox(svg, dataset, x_position) {
+	var last = dataset[0].length - 1;
 	for(var j = 0; j < dataset.length; j++) {
 	   svg.append("rect")
 	   .attr("height",height)
@@ -66,7 +68,8 @@ function stackbox(svg, dataset, x_position) {
 		  .style("font-size","12px");
 	   
 	   // this part is the lines
-	   y_new = (Number(dataset[j][3]) - min) / h1 * h2;
+	   y_new = (Number(dataset[j][last]) - min) / h1 * h2;
+	   
 	   var curveData = [ {x:x_position+width,y:j*height+0.5*height},{x:x_position+300,  y:y_new}];
 		svg.append("path")
 		   .datum(curveData)
@@ -85,13 +88,11 @@ function histogramplot(svg, dataset, x_position) {
 	   st[prop] = 0;
    }
    var count = 1;
+   var last = dataset[0].length - 1;
    // max to min
    for (var j = dataset.length -1; j >= 0; j--) {
-	   if (Number(dataset[j][3]) <= max + Math.abs(h1*count / 7) ) {
-		  // console.log("test");
+	   if (Number(dataset[j][last]) <= max + Math.abs(h1*count / 7) ) {
 		   st[dataset[j][1]] += 1;
-	   /*} else if (Number(dataset[j][3]) === max ) {
-		   st[dataset[j][1]] += 1;*/
 	   } else {
 		   var u = 0;
 		   var l = 0;
@@ -113,6 +114,7 @@ function histogramplot(svg, dataset, x_position) {
 		   j++;
 	   }
    }
+   // ugly...
    var u = 0;
    var l = 0;
 	for(var prop in st) {
@@ -173,41 +175,45 @@ function boxplot(svg, color, info, x_pos, h1, h2, max, min) {
        .attr("stroke", "black")
 }
 
-function boxdata(svg, dataset,x_position) {
+function boxdata(svg, dataset,x_position, pred) {
 	var positive = [];
 	var negative = [];
 	var all_val = [];
+	var last = dataset[0].length -1;
 	for (var j = 0;j < dataset.length; j++) {
-		if (Number(dataset[j][2]) > 0) {
-			positive.push(dataset[j][3]);
-		} else {
-			negative.push(dataset[j][3]);
+		if (pred > 0) {
+			if (Number(dataset[j][2]) > 0) {
+			positive.push(dataset[j][last]);
+			} else {
+				negative.push(dataset[j][last]);
+			}
 		}
-		all_val.push(dataset[j][3]);
+		all_val.push(dataset[j][last]);
 	}
-	positive.sort(compare);
-	var p1 = positive.map(Number);
-	negative.sort(compare);
-	var n1 = negative.map(Number);
-	all_val.sort(compare);
+	if (pred > 0) {
+		var p1 = positive.map(Number);
+		var n1 = negative.map(Number);
+		
+		// this part is ugly...
+		var p_info = {
+			max_val: p1[0],
+			Q3: p1[Math.floor(p1.length * 1 / 4)],
+			Q2: p1[Math.floor(p1.length * 1 / 2)],
+			Q1: p1[Math.floor(p1.length * 3 / 4)],
+			min_val: p1[p1.length - 1],
+		};
+		boxplot(svg, colors[0], p_info, x_position+500, h1, h2, max, min);
+		var n_info = {
+			max_val: n1[0],
+			Q3: n1[Math.floor(n1.length * 1 / 4)],
+			Q2: n1[Math.floor(n1.length * 1 / 2)],
+			Q1: n1[Math.floor(n1.length * 3 / 4)],
+			min_val: n1[n1.length -1],
+		};
+		boxplot(svg, colors[2], n_info, x_position+470, h1, h2, max, min);
+	}
+	
 	var a1 = all_val.map(Number);
-	// this part is ugly...
-	var p_info = {
-		max_val: p1[0],
-		Q3: p1[Math.floor(p1.length * 1 / 4)],
-		Q2: p1[Math.floor(p1.length * 1 / 2)],
-		Q1: p1[Math.floor(p1.length * 3 / 4)],
-		min_val: p1[p1.length - 1],
-	};
-	boxplot(svg, colors[0], p_info, x_position+500, h1, h2, max, min);
-	var n_info = {
-		max_val: n1[0],
-		Q3: n1[Math.floor(n1.length * 1 / 4)],
-		Q2: n1[Math.floor(n1.length * 1 / 2)],
-		Q1: n1[Math.floor(n1.length * 3 / 4)],
-		min_val: n1[n1.length -1],
-	};
-	boxplot(svg, colors[2], n_info, x_position+470, h1, h2, max, min);
 	var a_info = {
 		max_val: a1[0],
 		Q3: a1[Math.floor(a1.length * 1 / 4)],
@@ -226,6 +232,7 @@ d3.csv("00-comedies.csv", function(data) {
    var predicate = "";
    var item = "";
    var genre = "";
+   var pred = 0;
    // know the indices of different column we want
    var col_names = Object.keys(dataValues);
    for(var i = 0; i < col_names.length; i++) {
@@ -253,6 +260,7 @@ d3.csv("00-comedies.csv", function(data) {
    //console.log(genreColor);
    var x_position = 0;
 	if (predicate !== "") {
+		pred = 1;
 	   for (var i = 0; i < explainer.length; i++) {
 		   // TODO: need to give x value as input
 		  dataset = data.map(function(d) { return  [d[item], d[genre], d[predicate], d[explainer[i]]]; });
@@ -267,18 +275,30 @@ d3.csv("00-comedies.csv", function(data) {
 		  // histogram
 		  histogramplot(svg, dataset, x_position);
 		  // box
-		  boxdata(svg, dataset, x_position);
+		  boxdata(svg, dataset, x_position, pred);
 		  // clean up
 		  dataset = [];
 		  x_position += 530; // might need to adjust the value if user choose to not showing some of the plot
 	   }
 	} else {
+		console.log("here");
+		pred = 0;
 	   for (var i = 0; i < explainer.length; i++) {
 		  dataset = data.map(function(d) { return  [d[item], d[genre], d[explainer[i]]]; });
-		  // sort
-		  // line
+		  dataset.sort(compare);
+		  max = Number(dataset[dataset.length-1][2]);
+		  min = Number(dataset[0][2]);
+		  h1 = max - min;
+		  h2 = height * dataset.length;
+		  // stack box and lines
+		  stackbox(svg, dataset, x_position);
 		  // histogram
-		  // box without pos and neg
+		  histogramplot(svg, dataset, x_position);
+		  // box
+		  boxdata(svg, dataset, x_position, pred);
+		  // clean up
+		  dataset = [];
+		  x_position += 530; // might need to adjust the value if user choose to not showing some of the plot
 	   }
 	}
 });
