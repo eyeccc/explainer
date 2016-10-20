@@ -8,4 +8,5 @@ Column name must be:
 - "genre" (for category)
 - "predicate" (for predicate)
 - any names for explainer values
+
 Uppercase / lowercase does not matter.
