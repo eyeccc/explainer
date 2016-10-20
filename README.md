@@ -7,5 +7,5 @@ Column name must be:
 - "item" (for name)
 - "genre" (for category)
 - "predicate" (for predicate)
-- [any name] (for explainer values)
+- any names for explainer values
 Uppercase / lowercase does not matter.
