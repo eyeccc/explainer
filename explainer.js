@@ -29,7 +29,7 @@ function compare(a,b) {
   return 0;
 }
 
-function stackbox(svg, dataset) {
+function stackbox(svg, dataset, x_position) {
 	for(var j = 0; j < dataset.length; j++) {
 	   svg.append("rect")
 	   .attr("height",height)
@@ -38,7 +38,7 @@ function stackbox(svg, dataset) {
 	   .attr("id","sq"+j)
 	   .attr("stroke","black")
 	   .attr("class", "w"+j)
-	   .attr("x",10)
+	   .attr("x",x_position)
 	   .attr("y",j*height)
 	   .attr("rx",5)
 	   .attr("ry",5)
@@ -56,14 +56,14 @@ function stackbox(svg, dataset) {
 	   })
 	   
 	   svg.append("text")
-		  .attr("x",10 + 5)
+		  .attr("x",x_position + 5)
 		  .attr("y",15+j*height)
 		  .text(dataset[j][0])
 		  .style("font-size","12px");
 	   
 	   // this part is the lines
 	   y_new = (Number(dataset[j][3]) - min) / h1 * h2;
-	   var curveData = [ {x:10+width,y:j*height+0.5*height},{x:300,  y:y_new}];
+	   var curveData = [ {x:x_position+width,y:j*height+0.5*height},{x:x_position+300,  y:y_new}];
 		svg.append("path")
 		   .datum(curveData)
 		   .attr("class", "w"+j)
@@ -74,7 +74,7 @@ function stackbox(svg, dataset) {
    }
 }
 
-function histogramplot(svg, dataset) {
+function histogramplot(svg, dataset, x_position) {
    var box_h = h2 / 7; // num of bins, might need to change it to user input
    var st = genreColor;
    for(var prop in st) {
@@ -93,7 +93,7 @@ function histogramplot(svg, dataset) {
 		   var l = 0;
 		   for(var prop in st) {
 			   svg.append("rect")
-				.attr("x", 300 + u*10) // fixed position for now
+				.attr("x", x_position+300 + u*10) // fixed position for now
 				.attr("y", (7-(count))*box_h)
 				.attr("width", st[prop]*10)
 				.attr("height", box_h)
@@ -113,7 +113,7 @@ function histogramplot(svg, dataset) {
    var l = 0;
 	for(var prop in st) {
 		svg.append("rect")
-			.attr("x", 300 + u*10) // fixed position for now
+			.attr("x", x_position+300 + u*10) // fixed position for now
 			.attr("y", (7-(count))*box_h)
 			.attr("width", st[prop]*10)
 			.attr("height", box_h)
@@ -169,113 +169,8 @@ function boxplot(svg, color, info, x_pos, h1, h2, max, min) {
        .attr("stroke", "black")
 }
 
-d3.csv("00-comedies.csv", function(data) {
-   // get column name
-   var dataValues = d3.values(data)[0];
-   var explainer = [];
-   var predicate = "";
-   var item = "";
-   var genre = "";
-   // know the indices of different column we want
-   var col_names = Object.keys(dataValues);
-   for(var i = 0; i < col_names.length; i++) {
-	   var str = col_names[i].toLowerCase();
-	   if (str === "predicate") {
-		   predicate = col_names[i];
-	   } else if (str === "item") {
-		   item = col_names[i];
-	   } else if (str === "genre") {
-		   genre = col_names[i];
-	   } else {		   
-		   explainer.push(col_names[i]);
-	   }
-   }
-	/*console.log(item);
-	console.log(predicate);
-	console.log(genre);
-	console.log(explainer);*/
-	// get genre-color mapping
-   k = 0;
-   var genres = data.map(function(d) { return  d[genre]; });
-   //console.log(genres);
-   for (var j = 0; j < genres.length; j++) {
-	   if (!(genres[j] in genreColor)) {
-		   genreColor[genres[j]] = colors[k];
-		   k++;
-	   }
-   }
-   //console.log(genreColor);
-	if (predicate !== "") {
-	   for (var i = 0; i < explainer.length; i++) {
-		  dataset = data.map(function(d) { return  [d[item], d[genre], d[predicate], d[explainer[i]]]; });
-		  // sort
-		  dataset.sort(compare);
-		  max = Number(dataset[dataset.length-1][3]);
-		  min = Number(dataset[0][3]);
-		  h1 = max - min;
-		  h2 = height * dataset.length;
-		  // stack box and lines
-		  stackbox(svg, dataset);
-		  // histogram
-		  histogramplot(svg, dataset);
-		  // box
-		  var positive = [];
-			var negative = [];
-			var all_val = [];
-			for (var j = 0;j < dataset.length; j++) {
-				if (Number(dataset[j][2]) > 0) {
-					positive.push(dataset[j][3]);
-				} else {
-					negative.push(dataset[j][3]);
-				}
-				all_val.push(dataset[j][3]);
-			}
-			positive.sort(compare);
-			var p1 = positive.map(Number);
-			negative.sort(compare);
-			var n1 = negative.map(Number);
-			all_val.sort(compare);
-			var a1 = all_val.map(Number);
-			// this part is ugly...
-			var p_info = {
-				max_val: p1[0],
-				Q3: p1[Math.floor(p1.length * 1 / 4)],
-				Q2: p1[Math.floor(p1.length * 1 / 2)],
-				Q1: p1[Math.floor(p1.length * 3 / 4)],
-				min_val: p1[p1.length - 1],
-			};
-			boxplot(svg, colors[0], p_info, 500, h1, h2, max, min);
-			var n_info = {
-				max_val: n1[0],
-				Q3: n1[Math.floor(n1.length * 1 / 4)],
-				Q2: n1[Math.floor(n1.length * 1 / 2)],
-				Q1: n1[Math.floor(n1.length * 3 / 4)],
-				min_val: n1[n1.length -1],
-			};
-			boxplot(svg, colors[2], n_info, 470, h1, h2, max, min);
-			var a_info = {
-				max_val: a1[0],
-				Q3: a1[Math.floor(a1.length * 1 / 4)],
-				Q2: a1[Math.floor(a1.length * 1 / 2)],
-				Q1: a1[Math.floor(a1.length * 3 / 4)],
-				min_val: a1[a1.length -1],
-			};
-			boxplot(svg, colors[1], a_info, 440, h1, h2, max, min);
-		  dataset = [];
-	   }
-	} else {
-	   for (var i = 0; i < explainer.length; i++) {
-		  dataset = data.map(function(d) { return  [d[item], d[genre], d[explainer[i]]]; });
-		  // sort
-		  // line
-		  // histogram
-		  // box without pos and neg
-	   }
-	}
-		
-	// draw box plot, +1 / -1 / all
-	// only draw positive and negative ones if we have predicate
-	/*var positive = [];
+function boxdata(svg, dataset,x_position) {
+	var positive = [];
 	var negative = [];
 	var all_val = [];
 	for (var j = 0;j < dataset.length; j++) {
@@ -300,7 +195,7 @@ d3.csv("00-comedies.csv", function(data) {
 		Q1: p1[Math.floor(p1.length * 3 / 4)],
 		min_val: p1[p1.length - 1],
 	};
-	boxplot(svg, colors[0], p_info, 500, h1, h2, max, min);
+	boxplot(svg, colors[0], p_info, x_position+500, h1, h2, max, min);
 	var n_info = {
 		max_val: n1[0],
 		Q3: n1[Math.floor(n1.length * 1 / 4)],
@@ -308,7 +203,7 @@ d3.csv("00-comedies.csv", function(data) {
 		Q1: n1[Math.floor(n1.length * 3 / 4)],
 		min_val: n1[n1.length -1],
 	};
-	boxplot(svg, colors[2], n_info, 470, h1, h2, max, min);
+	boxplot(svg, colors[2], n_info, x_position+470, h1, h2, max, min);
 	var a_info = {
 		max_val: a1[0],
 		Q3: a1[Math.floor(a1.length * 1 / 4)],
@@ -316,6 +211,70 @@ d3.csv("00-comedies.csv", function(data) {
 		Q1: a1[Math.floor(a1.length * 3 / 4)],
 		min_val: a1[a1.length -1],
 	};
-	boxplot(svg, colors[1], a_info, 440, h1, h2, max, min);*/
+	boxplot(svg, colors[1], a_info, x_position+440, h1, h2, max, min);
+}
 
+// main function
+d3.csv("00-comedies.csv", function(data) {
+   // get column name
+   var dataValues = d3.values(data)[0];
+   var explainer = [];
+   var predicate = "";
+   var item = "";
+   var genre = "";
+   // know the indices of different column we want
+   var col_names = Object.keys(dataValues);
+   for(var i = 0; i < col_names.length; i++) {
+	   var str = col_names[i].toLowerCase();
+	   if (str === "predicate") {
+		   predicate = col_names[i];
+	   } else if (str === "item") {
+		   item = col_names[i];
+	   } else if (str === "genre") {
+		   genre = col_names[i];
+	   } else {		   
+		   explainer.push(col_names[i]);
+	   }
+   }
+   // get genre-color mapping
+   k = 0;
+   var genres = data.map(function(d) { return  d[genre]; });
+   //console.log(genres);
+   for (var j = 0; j < genres.length; j++) {
+	   if (!(genres[j] in genreColor)) {
+		   genreColor[genres[j]] = colors[k];
+		   k++;
+	   }
+   }
+   //console.log(genreColor);
+   var x_position = 0;
+	if (predicate !== "") {
+	   for (var i = 0; i < explainer.length; i++) {
+		   // TODO: need to give x value as input
+		  dataset = data.map(function(d) { return  [d[item], d[genre], d[predicate], d[explainer[i]]]; });
+		  // sort
+		  dataset.sort(compare);
+		  max = Number(dataset[dataset.length-1][3]);
+		  min = Number(dataset[0][3]);
+		  h1 = max - min;
+		  h2 = height * dataset.length;
+		  // stack box and lines
+		  stackbox(svg, dataset, x_position);
+		  // histogram
+		  histogramplot(svg, dataset, x_position);
+		  // box
+		  boxdata(svg, dataset, x_position);
+		  // clean up
+		  dataset = [];
+		  x_position += 530; // might need to adjust the value if user choose to not showing some of the plot
+	   }
+	} else {
+	   for (var i = 0; i < explainer.length; i++) {
+		  dataset = data.map(function(d) { return  [d[item], d[genre], d[explainer[i]]]; });
+		  // sort
+		  // line
+		  // histogram
+		  // box without pos and neg
+	   }
+	}
 });
