@@ -13,8 +13,7 @@ var svg = d3.select("svg"),
     height = +svg.attr("height"),
     g = svg.append("g").attr("transform", "translate(32," + (height / 2) + ")");
 
-var dataset = [];
-var genreColor = {};
+
 
 // box size for each element
 var height = 20;
@@ -30,16 +29,17 @@ function compare(a,b) {
   return 0;
 }
 
-function stackbox(svg, dataset, x_position) {
+function stackbox(svg, dataset, x_position, genreColor) {
 	var last = dataset[0].length - 1;
 	for(var j = 0; j < dataset.length; j++) {
+		var cname = dataset[j][0].replace(/\s+/g, '');
 	   svg.append("rect")
 	   .attr("height",height)
 	   .attr("width",width)
 	   .attr("fill",genreColor[dataset[j][1]])
-	   .attr("id","sq"+j)
+	   .attr("id","sq")
 	   .attr("stroke","black")
-	   .attr("class", "w"+j)
+	   .attr("class", cname)
 	   .attr("x",x_position)
 	   .attr("y",j*height)
 	   .attr("rx",5)
@@ -52,11 +52,12 @@ function stackbox(svg, dataset, x_position) {
 	   })
 	   .on("mouseout", function() {
 		   c = "." + d3.select(this).attr("class");
+		   idd = "#" + d3.select(this).attr("id");
 		   col = d3.select(this).attr("fill");
 		   d3.selectAll(c)
 			 .attr("stroke",col)
 			 .attr("stroke-width","1px")
-		   d3.select(this)
+		   d3.selectAll(idd)
 		     .attr("stroke","black")
 			 .attr("stroke-width","1px")
 	   })
@@ -73,17 +74,25 @@ function stackbox(svg, dataset, x_position) {
 	   var curveData = [ {x:x_position+width,y:j*height+0.5*height},{x:x_position+300,  y:y_new}];
 		svg.append("path")
 		   .datum(curveData)
-		   .attr("class", "w"+j)
+		   .attr("class", cname)
 		   .attr("id",dataset[j][1])
 		   .attr("d", diagonal)
 		   .attr("stroke", genreColor[dataset[j][1]])
 		   .attr("fill","none")
    }
 }
-
-function histogramplot(svg, dataset, x_position) {
+function clone(obj) {
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+    }
+    return copy;
+}
+function histogramplot(svg, dataset, x_position, genreColor) {
+	//console.log(genreColor);
    var box_h = h2 / 7; // num of bins, might need to change it to user input
-   var st = genreColor;
+   var st = clone(genreColor);
    for(var prop in st) {
 	   st[prop] = 0;
    }
@@ -226,7 +235,7 @@ function boxdata(svg, dataset,x_position, pred) {
 
 
 
-document.addEventListener("DOMContentLoaded", function (event) {
+/*document.addEventListener("DOMContentLoaded", function (event) {
     var _selector = document.querySelector('input[name=linecheck]');
     _selector.addEventListener('change', function (event) {
         if (_selector.checked) {
@@ -234,11 +243,14 @@ document.addEventListener("DOMContentLoaded", function (event) {
         } else {
             document.getElementById("myDiv").style.backgroundColor = "blue";
         }
-    });
+    });*/
 
 // main function
-d3.csv("00-comedies.csv", function(data) {
+
+d3.csv("shak-exp.csv", function(data) {
    // get column name
+   var dataset = [];
+   var genreColor = {};
    var dataValues = d3.values(data)[0];
    var explainer = [];
    var predicate = "";
@@ -277,15 +289,16 @@ d3.csv("00-comedies.csv", function(data) {
 		   // TODO: need to give x value as input
 		  dataset = data.map(function(d) { return  [d[item], d[genre], d[predicate], d[explainer[i]]]; });
 		  // sort
+		  // TODO: need to assign id for them
 		  dataset.sort(compare);
 		  max = Number(dataset[dataset.length-1][3]);
 		  min = Number(dataset[0][3]);
 		  h1 = max - min;
 		  h2 = height * dataset.length;
 		  // stack box and lines
-		  stackbox(svg, dataset, x_position);
+		  stackbox(svg, dataset, x_position, genreColor);
 		  // histogram
-		  histogramplot(svg, dataset, x_position);
+		  histogramplot(svg, dataset, x_position, genreColor);
 		  // box
 		  boxdata(svg, dataset, x_position, pred);
 		  // clean up
@@ -293,7 +306,7 @@ d3.csv("00-comedies.csv", function(data) {
 		  x_position += 530; // might need to adjust the value if user choose to not showing some of the plot
 	   }
 	} else {
-		console.log("here");
+		//console.log("here");
 		pred = 0;
 	   for (var i = 0; i < explainer.length; i++) {
 		  dataset = data.map(function(d) { return  [d[item], d[genre], d[explainer[i]]]; });
@@ -303,9 +316,9 @@ d3.csv("00-comedies.csv", function(data) {
 		  h1 = max - min;
 		  h2 = height * dataset.length;
 		  // stack box and lines
-		  stackbox(svg, dataset, x_position);
+		  stackbox(svg, dataset, x_position, genreColor);
 		  // histogram
-		  histogramplot(svg, dataset, x_position);
+		  histogramplot(svg, dataset, x_position, genreColor);
 		  // box
 		  boxdata(svg, dataset, x_position, pred);
 		  // clean up
