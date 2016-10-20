@@ -13,8 +13,8 @@ var svg = d3.select("svg"),
     height = +svg.attr("height"),
     g = svg.append("g").attr("transform", "translate(32," + (height / 2) + ")");
 
-
-
+// TODO: decide max height and stack the box together
+var truncLength = 10;
 // box size for each element
 var height = 20;
 var width = 150;
@@ -61,11 +61,15 @@ function stackbox(svg, dataset, x_position, genreColor) {
 		     .attr("stroke","black")
 			 .attr("stroke-width","1px")
 	   })
-	   
+
+	   var truncate_text = dataset[j][0].length < truncLength + 3 
+						 ? dataset[j][0] 
+						 : dataset[j][0].substring(0,truncLength) + "...";
+
 	   svg.append("text")
 		  .attr("x",x_position + 5)
 		  .attr("y",15+j*height)
-		  .text(dataset[j][0])
+		  .text(truncate_text)
 		  .style("font-size","12px");
 	   
 	   // this part is the lines
