@@ -50,8 +50,12 @@ function stackbox(svg, dataset, x_position) {
 	   })
 	   .on("mouseout", function() {
 		   c = "." + d3.select(this).attr("class");
+		   col = d3.select(this).attr("fill");
 		   d3.selectAll(c)
-			 .attr("stroke","black")
+			 .attr("stroke",col)
+			 .attr("stroke-width","1px")
+		   d3.select(this)
+		     .attr("stroke","black")
 			 .attr("stroke-width","1px")
 	   })
 	   
