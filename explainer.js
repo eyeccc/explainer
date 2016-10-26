@@ -6,7 +6,13 @@ var diagonal = d3.svg.diagonal()
 
 // might need to let user choose how many genres they have
 var colors = ["#8dd3c7","#ffffb3","#bebada","#fb8072"]; // if we only have 4 genres.
-
+// tooltip
+var tooltip = d3.select("body")
+	.append("div")
+	.style("position", "absolute")
+	.style("z-index", "10")
+	.style("visibility", "hidden")
+	.text("a simple tooltip");
 // main svg canvas
 var svg = d3.select("svg"),
     width = +svg.attr("width"),
@@ -17,7 +23,8 @@ var svg = d3.select("svg"),
 var truncLength = 10;
 // box size for each element
 var height = 20;
-var width = 150;
+var width = 20;
+
 
 // helper function to sort the dataset by its p value
 function compare(a,b) {
@@ -32,7 +39,7 @@ function compare(a,b) {
 function stackbox(svg, dataset, x_position, genreColor) {
 	var last = dataset[0].length - 1;
 	for(var j = 0; j < dataset.length; j++) {
-		var cname = dataset[j][0].replace(/\s+/g, '');
+		var cname = "b" + dataset[j][0].replace(/[^A-Z0-9]/ig, "_");
 	   svg.append("rect")
 	   .attr("height",height)
 	   .attr("width",width)
@@ -46,31 +53,35 @@ function stackbox(svg, dataset, x_position, genreColor) {
 	   .attr("ry",5)
 	   .on("mouseover", function() {
 		   c = "." + d3.select(this).attr("class");
+		   c1 = ".t" + d3.select(this).attr("class");
 		   d3.selectAll(c)
 			 .attr("stroke","red")
-			 .attr("stroke-width","4px")
+			 .attr("stroke-width","4px");
+		   d3.selectAll(c1)
+             .style("visibility","visible");
+		//tooltip.style("visibility", "visible");
 	   })
 	   .on("mouseout", function() {
 		   c = "." + d3.select(this).attr("class");
+		   c1 = ".t" + d3.select(this).attr("class");
 		   idd = "#" + d3.select(this).attr("id");
 		   col = d3.select(this).attr("fill");
 		   d3.selectAll(c)
 			 .attr("stroke",col)
-			 .attr("stroke-width","1px")
+			 .attr("stroke-width","1px");
+		   d3.selectAll(c1)
+			 .style("visibility","hidden");
 		   d3.selectAll(idd)
 		     .attr("stroke","black")
-			 .attr("stroke-width","1px")
+			 .attr("stroke-width","1px");
+		  // tooltip.style("visibility", "hidden");
 	   })
 
-	   var truncate_text = dataset[j][0].length < truncLength + 3 
+	   /*var truncate_text = dataset[j][0].length < truncLength + 3 
 						 ? dataset[j][0] 
-						 : dataset[j][0].substring(0,truncLength) + "...";
+						 : dataset[j][0].substring(0,truncLength) + "...";*/
 
-	   svg.append("text")
-		  .attr("x",x_position + 5)
-		  .attr("y",15+j*height)
-		  .text(truncate_text)
-		  .style("font-size","12px");
+	   
 	   
 	   // this part is the lines
 	   y_new = (Number(dataset[j][last]) - min) / h1 * h2;
@@ -83,6 +94,24 @@ function stackbox(svg, dataset, x_position, genreColor) {
 		   .attr("d", diagonal)
 		   .attr("stroke", genreColor[dataset[j][1]])
 		   .attr("fill","none")
+		svg.append("rect")
+		.attr("height",18)
+	   .attr("width",dataset[j][0].length * 8)
+	   .attr("fill","#e3e7ed")
+	   .attr("rx",5)
+	   .attr("ry",5)
+		  .attr("class", "t" + cname)
+		  .attr("x",x_position)
+		  .attr("y",j*height+2)
+		  .style("opacity", 0.7)
+		  .style("visibility","hidden");
+		svg.append("text")
+		  .attr("class", "t" + cname)
+		  .attr("x",x_position + 5)
+		  .attr("y",15+j*height)
+		  .text(dataset[j][0])
+		  .style("font-size","12px")
+		  .style("visibility","hidden");
    }
 }
 function clone(obj) {
