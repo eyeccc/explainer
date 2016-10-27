@@ -114,14 +114,14 @@ explainer = function(inputfilename) {
 				   .attr("rx",5)
 				   .attr("ry",5)
 				   .attr("class", "t" + cname)
-				   .attr("x",x_position + k*width)
-				   .attr("y",Math.floor(j/colsInRow)*height+2)
+				   .attr("x",x_position + k*width + 10)
+				   .attr("y",Math.floor(j/colsInRow)*height+2 + 5)
 				   .style("opacity", 0.7)
 				   .style("visibility","hidden");
 				svg.append("text")
 				   .attr("class", "t" + cname)
-				   .attr("x",x_position + k*width + 5)
-				   .attr("y",15+Math.floor(j/colsInRow)*height)
+				   .attr("x",x_position + k*width + 5 + 10)
+				   .attr("y",15+Math.floor(j/colsInRow)*height + 5)
 				   .text(dataset[j+k][0])
 				   .style("font-size","12px")
 				   .style("visibility","hidden");
