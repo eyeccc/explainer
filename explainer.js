@@ -24,7 +24,11 @@ var truncLength = 10;
 // box size for each element
 var height = 20;
 var width = 20;
-
+d3.selection.prototype.moveToFront = function() {  
+      return this.each(function(){
+        this.parentNode.appendChild(this);
+      });
+    };
 
 // helper function to sort the dataset by its p value
 function compare(a,b) {
@@ -38,80 +42,78 @@ function compare(a,b) {
 
 function stackbox(svg, dataset, x_position, genreColor) {
 	var last = dataset[0].length - 1;
+	var colsInRow = Math.ceil(dataset.length / 30); // max rows = 30
 	for(var j = 0; j < dataset.length; j++) {
-		var cname = "b" + dataset[j][0].replace(/[^A-Z0-9]/ig, "_");
-	   svg.append("rect")
-	   .attr("height",height)
-	   .attr("width",width)
-	   .attr("fill",genreColor[dataset[j][1]])
-	   .attr("id","sq")
-	   .attr("stroke","black")
-	   .attr("class", cname)
-	   .attr("x",x_position)
-	   .attr("y",j*height)
-	   .attr("rx",5)
-	   .attr("ry",5)
-	   .on("mouseover", function() {
-		   c = "." + d3.select(this).attr("class");
-		   c1 = ".t" + d3.select(this).attr("class");
-		   d3.selectAll(c)
-			 .attr("stroke","red")
-			 .attr("stroke-width","4px");
-		   d3.selectAll(c1)
-             .style("visibility","visible");
-		//tooltip.style("visibility", "visible");
-	   })
-	   .on("mouseout", function() {
-		   c = "." + d3.select(this).attr("class");
-		   c1 = ".t" + d3.select(this).attr("class");
-		   idd = "#" + d3.select(this).attr("id");
-		   col = d3.select(this).attr("fill");
-		   d3.selectAll(c)
-			 .attr("stroke",col)
-			 .attr("stroke-width","1px");
-		   d3.selectAll(c1)
-			 .style("visibility","hidden");
-		   d3.selectAll(idd)
-		     .attr("stroke","black")
-			 .attr("stroke-width","1px");
-		  // tooltip.style("visibility", "hidden");
-	   })
-
-	   /*var truncate_text = dataset[j][0].length < truncLength + 3 
-						 ? dataset[j][0] 
-						 : dataset[j][0].substring(0,truncLength) + "...";*/
-
+		for(var k = 0; k < colsInRow; k++) {
+			if (j+k >= dataset.length) {
+				break;
+			}
+			var cname = "b" + dataset[j+k][0].replace(/[^A-Z0-9]/ig, "_");
+		   svg.append("rect")
+		   .attr("height",height)
+		   .attr("width",width)
+		   .attr("fill",genreColor[dataset[j+k][1]])
+		   .attr("id","sq")
+		   .attr("stroke","black")
+		   .attr("class", cname)
+		   .attr("x",x_position + k*width)
+		   .attr("y",Math.floor(j/colsInRow)*height)
+		   .attr("rx",5)
+		   .attr("ry",5)
+		   .on("mouseover", function() {
+			   c = "." + d3.select(this).attr("class");
+			   c1 = ".t" + d3.select(this).attr("class");
+			   d3.selectAll(c)
+				 .attr("stroke","red")
+				 .attr("stroke-width","4px");
+			   d3.selectAll(c1)
+			     .moveToFront()
+				 .style("visibility","visible");
+		   })
+		   .on("mouseout", function() {
+			   c = "." + d3.select(this).attr("class");
+			   c1 = ".t" + d3.select(this).attr("class");
+			   idd = "#" + d3.select(this).attr("id");
+			   col = d3.select(this).attr("fill");
+			   d3.selectAll(c)
+				 .attr("stroke",col)
+				 .attr("stroke-width","1px");
+			   d3.selectAll(c1)
+				 .style("visibility","hidden");
+			   d3.selectAll(idd)
+				 .attr("stroke","black")
+				 .attr("stroke-width","1px");
+		   })
+		   y_new = (Number(dataset[j+k][last]) - min) / h1 * h2;
 	   
-	   
-	   // this part is the lines
-	   y_new = (Number(dataset[j][last]) - min) / h1 * h2;
-	   
-	   var curveData = [ {x:x_position+width,y:j*height+0.5*height},{x:x_position+300,  y:y_new}];
+	   var curveData = [ {x:x_position+width*colsInRow,y:Math.floor(j/colsInRow)*height+0.5*height},{x:x_position+width*colsInRow+100,  y:y_new}];
 		svg.append("path")
 		   .datum(curveData)
 		   .attr("class", cname)
-		   .attr("id",dataset[j][1])
+		   .attr("id",dataset[j+k][1])
 		   .attr("d", diagonal)
-		   .attr("stroke", genreColor[dataset[j][1]])
+		   .attr("stroke", genreColor[dataset[j+k][1]])
 		   .attr("fill","none")
 		svg.append("rect")
 		.attr("height",18)
-	   .attr("width",dataset[j][0].length * 8)
+	   .attr("width",dataset[j+k][0].length * 8)
 	   .attr("fill","#e3e7ed")
 	   .attr("rx",5)
 	   .attr("ry",5)
 		  .attr("class", "t" + cname)
-		  .attr("x",x_position)
-		  .attr("y",j*height+2)
+		  .attr("x",x_position + k*width)
+		  .attr("y",Math.floor(j/colsInRow)*height+2)
 		  .style("opacity", 0.7)
 		  .style("visibility","hidden");
 		svg.append("text")
 		  .attr("class", "t" + cname)
-		  .attr("x",x_position + 5)
-		  .attr("y",15+j*height)
-		  .text(dataset[j][0])
+		  .attr("x",x_position + k*width + 5)
+		  .attr("y",15+Math.floor(j/colsInRow)*height)
+		  .text(dataset[j+k][0])
 		  .style("font-size","12px")
 		  .style("visibility","hidden");
+		}
+		j+= colsInRow-1;
    }
 }
 function clone(obj) {
@@ -124,6 +126,14 @@ function clone(obj) {
 }
 function histogramplot(svg, dataset, x_position, genreColor) {
 	//console.log(genreColor);
+	// bottom axis of the histogram
+	svg.append("line")
+	   .attr("x1",x_position+300)
+	   .attr("y1",0)
+	   .attr("x2",x_position+300)
+	   .attr("y2",h2)
+	   .attr("stroke-width", 1)
+       .attr("stroke", "green")
    var box_h = h2 / 7; // num of bins, might need to change it to user input
    var st = clone(genreColor);
    for(var prop in st) {
@@ -280,7 +290,7 @@ function boxdata(svg, dataset,x_position, pred) {
 
 // main function
 
-d3.csv("shak-exp.csv", function(data) {
+d3.csv("rca.csv", function(data) {
    // get column name
    var dataset = [];
    var genreColor = {};
@@ -327,7 +337,7 @@ d3.csv("shak-exp.csv", function(data) {
 		  max = Number(dataset[dataset.length-1][3]);
 		  min = Number(dataset[0][3]);
 		  h1 = max - min;
-		  h2 = height * dataset.length;
+		  h2 = height * 30;
 		  // stack box and lines
 		  stackbox(svg, dataset, x_position, genreColor);
 		  // histogram
@@ -347,13 +357,13 @@ d3.csv("shak-exp.csv", function(data) {
 		  max = Number(dataset[dataset.length-1][2]);
 		  min = Number(dataset[0][2]);
 		  h1 = max - min;
-		  h2 = height * dataset.length;
+		  h2 = height * 30;
 		  // stack box and lines
 		  stackbox(svg, dataset, x_position, genreColor);
 		  // histogram
-		  histogramplot(svg, dataset, x_position, genreColor);
+		 /* histogramplot(svg, dataset, x_position, genreColor);
 		  // box
-		  boxdata(svg, dataset, x_position, pred);
+		  boxdata(svg, dataset, x_position, pred);*/
 		  // clean up
 		  dataset = [];
 		  x_position += 530; // might need to adjust the value if user choose to not showing some of the plot
