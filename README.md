@@ -15,4 +15,4 @@ Uppercase / lowercase does not matter.
 Just type `explainer(yourCSVFileName)` in your javascript code
 
 ## Demo
-![ScreenShot](https://raw.github.com/eyeccc/explainer/master/explainer.png)
+![ScreenShot](https://github.com/eyeccc/explainer/blob/master/explainer.png)
