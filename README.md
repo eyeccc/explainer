@@ -10,3 +10,9 @@ Column name must be:
 - any names for explainer values
 
 Uppercase / lowercase does not matter.
+
+## Usage
+Just type `explainer(yourCSVFileName)` in your javascript code
+
+## Demo
+![ScreenShot](https://raw.github.com/eyeccc/explainer/master/explainer.png)
