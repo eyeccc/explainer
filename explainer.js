@@ -6,21 +6,13 @@ var diagonal = d3.svg.diagonal()
 
 // might need to let user choose how many genres they have
 var colors = ["#8dd3c7","#ffffb3","#bebada","#fb8072"]; // if we only have 4 genres.
-// tooltip
-var tooltip = d3.select("body")
-	.append("div")
-	.style("position", "absolute")
-	.style("z-index", "10")
-	.style("visibility", "hidden")
-	.text("a simple tooltip");
+
 // main svg canvas
 var svg = d3.select("svg"),
     width = +svg.attr("width"),
     height = +svg.attr("height"),
     g = svg.append("g").attr("transform", "translate(32," + (height / 2) + ")");
 
-// TODO: decide max height and stack the box together
-var truncLength = 10;
 // box size for each element
 var height = 20;
 var width = 20;
@@ -32,7 +24,7 @@ d3.selection.prototype.moveToFront = function() {
 
 // helper function to sort the dataset by its p value
 function compare(a,b) {
-  var last = a.length - 1;
+  var last = a.length - 2;
   if (Number(a[last]) > Number(b[last]))
     return -1;
   if (Number(a[last]) < Number(b[last]))
@@ -41,77 +33,82 @@ function compare(a,b) {
 }
 
 function stackbox(svg, dataset, x_position, genreColor) {
-	var last = dataset[0].length - 1;
+	var last = dataset[0].length - 2;
 	var colsInRow = Math.ceil(dataset.length / 30); // max rows = 30
 	for(var j = 0; j < dataset.length; j++) {
 		for(var k = 0; k < colsInRow; k++) {
 			if (j+k >= dataset.length) {
 				break;
 			}
-			var cname = "b" + dataset[j+k][0].replace(/[^A-Z0-9]/ig, "_");
-		   svg.append("rect")
-		   .attr("height",height)
-		   .attr("width",width)
-		   .attr("fill",genreColor[dataset[j+k][1]])
-		   .attr("id","sq")
-		   .attr("stroke","black")
-		   .attr("class", cname)
-		   .attr("x",x_position + k*width)
-		   .attr("y",Math.floor(j/colsInRow)*height)
-		   .attr("rx",5)
-		   .attr("ry",5)
-		   .on("mouseover", function() {
-			   c = "." + d3.select(this).attr("class");
-			   c1 = ".t" + d3.select(this).attr("class");
-			   d3.selectAll(c)
-				 .attr("stroke","red")
-				 .attr("stroke-width","4px");
-			   d3.selectAll(c1)
-			     .moveToFront()
-				 .style("visibility","visible");
-		   })
-		   .on("mouseout", function() {
-			   c = "." + d3.select(this).attr("class");
-			   c1 = ".t" + d3.select(this).attr("class");
-			   idd = "#" + d3.select(this).attr("id");
-			   col = d3.select(this).attr("fill");
-			   d3.selectAll(c)
-				 .attr("stroke",col)
-				 .attr("stroke-width","1px");
-			   d3.selectAll(c1)
-				 .style("visibility","hidden");
-			   d3.selectAll(idd)
-				 .attr("stroke","black")
-				 .attr("stroke-width","1px");
-		   })
-		   y_new = (Number(dataset[j+k][last]) - min) / h1 * h2;
+			var cname = dataset[j+k][last+1];
+		    svg.append("rect")
+		       .attr("height",height)
+		       .attr("width",width)
+		       .attr("fill",genreColor[dataset[j+k][1]])
+		       .attr("id","sq")
+		       .attr("stroke","black")
+		       .attr("class", cname)
+		       .attr("x",x_position + k*width)
+		       .attr("y",Math.floor(j/colsInRow)*height)
+		       .attr("rx",5)
+		       .attr("ry",5)
+		       .on("mouseover", function() {
+			       c = "." + d3.select(this).attr("class");
+			       c1 = ".t" + d3.select(this).attr("class");
+			       d3.selectAll(c)
+				     .attr("stroke","red")
+				     .attr("stroke-width","4px");
+			       d3.selectAll(c1)
+			         .moveToFront()
+				     .style("visibility","visible");
+		        })
+		       .on("mouseout", function() {
+			       c = "." + d3.select(this).attr("class");
+			       c1 = ".t" + d3.select(this).attr("class");
+			       idd = "#" + d3.select(this).attr("id");
+			       col = d3.select(this).attr("fill");
+			       d3.selectAll(c)
+			    	 .attr("stroke",col)
+				     .attr("stroke-width","1px");
+			       d3.selectAll(c1)
+				     .style("visibility","hidden");
+			       d3.selectAll(idd)
+				     .attr("stroke","black")
+				     .attr("stroke-width","1px");
+		        })
+			// lines connectin small boxes and histogram
+		    y_new = (Number(dataset[j+k][last]) - min) / h1 * h2;
 	   
-	   var curveData = [ {x:x_position+width*colsInRow,y:Math.floor(j/colsInRow)*height+0.5*height},{x:x_position+width*colsInRow+100,  y:y_new}];
-		svg.append("path")
-		   .datum(curveData)
-		   .attr("class", cname)
-		   .attr("id",dataset[j+k][1])
-		   .attr("d", diagonal)
-		   .attr("stroke", genreColor[dataset[j+k][1]])
-		   .attr("fill","none")
-		svg.append("rect")
-		.attr("height",18)
-	   .attr("width",dataset[j+k][0].length * 8)
-	   .attr("fill","#e3e7ed")
-	   .attr("rx",5)
-	   .attr("ry",5)
-		  .attr("class", "t" + cname)
-		  .attr("x",x_position + k*width)
-		  .attr("y",Math.floor(j/colsInRow)*height+2)
-		  .style("opacity", 0.7)
-		  .style("visibility","hidden");
-		svg.append("text")
-		  .attr("class", "t" + cname)
-		  .attr("x",x_position + k*width + 5)
-		  .attr("y",15+Math.floor(j/colsInRow)*height)
-		  .text(dataset[j+k][0])
-		  .style("font-size","12px")
-		  .style("visibility","hidden");
+	        var curveData = [
+			    {x:x_position+width*colsInRow,y:Math.floor(j/colsInRow)*height+0.5*height},
+				{x:x_position+width*colsInRow+100,  y:y_new}
+			];
+		    svg.append("path")
+		       .datum(curveData)
+		       .attr("class", cname)
+		       .attr("id",dataset[j+k][1])
+		       .attr("d", diagonal)
+		       .attr("stroke", genreColor[dataset[j+k][1]])
+		       .attr("fill","none")
+			// tooltip
+		    svg.append("rect")
+		       .attr("height",18)
+	           .attr("width",dataset[j+k][0].length * 8)
+	           .attr("fill","#e3e7ed")
+	           .attr("rx",5)
+	           .attr("ry",5)
+	           .attr("class", "t" + cname)
+		       .attr("x",x_position + k*width)
+		       .attr("y",Math.floor(j/colsInRow)*height+2)
+		       .style("opacity", 0.7)
+		       .style("visibility","hidden");
+		    svg.append("text")
+		       .attr("class", "t" + cname)
+		       .attr("x",x_position + k*width + 5)
+		       .attr("y",15+Math.floor(j/colsInRow)*height)
+		       .text(dataset[j+k][0])
+		       .style("font-size","12px")
+		       .style("visibility","hidden");
 		}
 		j+= colsInRow-1;
    }
@@ -124,61 +121,61 @@ function clone(obj) {
     }
     return copy;
 }
-function histogramplot(svg, dataset, x_position, genreColor) {
-	//console.log(genreColor);
+function histogramplot(svg, dataset, x_position, genreColor, maxWidth) {
+	var box_w = maxWidth / dataset.length;
 	// bottom axis of the histogram
 	svg.append("line")
-	   .attr("x1",x_position+300)
+	   .attr("x1",x_position)
 	   .attr("y1",0)
-	   .attr("x2",x_position+300)
+	   .attr("x2",x_position)
 	   .attr("y2",h2)
 	   .attr("stroke-width", 1)
        .attr("stroke", "green")
-   var box_h = h2 / 7; // num of bins, might need to change it to user input
-   var st = clone(genreColor);
-   for(var prop in st) {
-	   st[prop] = 0;
-   }
-   var count = 1;
-   var last = dataset[0].length - 1;
-   // max to min
-   for (var j = dataset.length -1; j >= 0; j--) {
-	   if (Number(dataset[j][last]) <= max + Math.abs(h1*count / 7) ) {
-		   st[dataset[j][1]] += 1;
-	   } else {
-		   var u = 0;
-		   var l = 0;
-		   for(var prop in st) {
-			   svg.append("rect")
-				.attr("x", x_position+300 + u*10) // fixed position for now
-				.attr("y", (7-(count))*box_h)
-				.attr("width", st[prop]*10)
-				.attr("height", box_h)
-				.attr("stroke","green")
-				.attr("fill", colors[l]);
+    var box_h = h2 / 7; // num of bins, might need to change it to user input
+    var st = clone(genreColor);
+    for(var prop in st) {
+	    st[prop] = 0;
+    }
+    var count = 1;
+    var last = dataset[0].length - 2;
+    // max to min
+    for (var j = dataset.length -1; j >= 0; j--) {
+	    if (Number(dataset[j][last]) <= max + Math.abs(h1*count / 7) ) {
+	    	st[dataset[j][1]] += 1;
+	    } else {
+		    var u = 0;
+		    var l = 0;
+		    for(var prop in st) {
+			    svg.append("rect")
+			       .attr("x", x_position + u*box_w) // fixed position for now
+				   .attr("y", (7-(count))*box_h)
+				   .attr("width", st[prop]*box_w)
+				   .attr("height", box_h)
+				   .attr("stroke","green")
+				   .attr("fill", colors[l]);
 				u += st[prop];
 				l++;
 		   }
 		   for(var prop in st) {
-			   st[prop] = 0;
+			    st[prop] = 0;
 		   }
 		   count++;
 		   j++;
 	   }
-   }
-   // ugly...
-   var u = 0;
-   var l = 0;
+    }
+    // ugly...
+    var u = 0;
+    var l = 0;
 	for(var prop in st) {
 		svg.append("rect")
-			.attr("x", x_position+300 + u*10) // fixed position for now
-			.attr("y", (7-(count))*box_h)
-			.attr("width", st[prop]*10)
-			.attr("height", box_h)
-			.attr("stroke","green")
-			.attr("fill", colors[l]);
-			u += st[prop];
-			l++;
+		   .attr("x", x_position + u*box_w) // fixed position for now
+		   .attr("y", (7-(count))*box_h)
+		   .attr("width", st[prop]*box_w)
+		   .attr("height", box_h)
+		   .attr("stroke","green")
+		   .attr("fill", colors[l]);
+		u += st[prop];
+		l++;
 	}
 }
 
@@ -231,7 +228,7 @@ function boxdata(svg, dataset,x_position, pred) {
 	var positive = [];
 	var negative = [];
 	var all_val = [];
-	var last = dataset[0].length -1;
+	var last = dataset[0].length -2;
 	for (var j = 0;j < dataset.length; j++) {
 		if (pred > 0) {
 			if (Number(dataset[j][2]) > 0) {
@@ -254,7 +251,7 @@ function boxdata(svg, dataset,x_position, pred) {
 			Q1: p1[Math.floor(p1.length * 3 / 4)],
 			min_val: p1[p1.length - 1],
 		};
-		boxplot(svg, colors[0], p_info, x_position+500, h1, h2, max, min);
+		boxplot(svg, colors[0], p_info, x_position+70, h1, h2, max, min);
 		var n_info = {
 			max_val: n1[0],
 			Q3: n1[Math.floor(n1.length * 1 / 4)],
@@ -262,7 +259,7 @@ function boxdata(svg, dataset,x_position, pred) {
 			Q1: n1[Math.floor(n1.length * 3 / 4)],
 			min_val: n1[n1.length -1],
 		};
-		boxplot(svg, colors[2], n_info, x_position+470, h1, h2, max, min);
+		boxplot(svg, colors[2], n_info, x_position+40, h1, h2, max, min);
 	}
 	
 	var a1 = all_val.map(Number);
@@ -273,7 +270,7 @@ function boxdata(svg, dataset,x_position, pred) {
 		Q1: a1[Math.floor(a1.length * 3 / 4)],
 		min_val: a1[a1.length -1],
 	};
-	boxplot(svg, colors[1], a_info, x_position+440, h1, h2, max, min);
+	boxplot(svg, colors[1], a_info, x_position+10, h1, h2, max, min);
 }
 
 
@@ -292,81 +289,64 @@ function boxdata(svg, dataset,x_position, pred) {
 
 d3.csv("rca.csv", function(data) {
    // get column name
-   var dataset = [];
-   var genreColor = {};
-   var dataValues = d3.values(data)[0];
-   var explainer = [];
-   var predicate = "";
-   var item = "";
-   var genre = "";
-   var pred = 0;
-   // know the indices of different column we want
-   var col_names = Object.keys(dataValues);
-   for(var i = 0; i < col_names.length; i++) {
-	   var str = col_names[i].toLowerCase();
-	   if (str === "predicate") {
-		   predicate = col_names[i];
-	   } else if (str === "item") {
-		   item = col_names[i];
-	   } else if (str === "genre") {
-		   genre = col_names[i];
-	   } else {		   
-		   explainer.push(col_names[i]);
-	   }
-   }
-   // get genre-color mapping
-   k = 0;
-   var genres = data.map(function(d) { return  d[genre]; });
-   //console.log(genres);
-   for (var j = 0; j < genres.length; j++) {
-	   if (!(genres[j] in genreColor)) {
-		   genreColor[genres[j]] = colors[k];
-		   k++;
-	   }
-   }
-   //console.log(genreColor);
-   var x_position = 0;
-	if (predicate !== "") {
-		pred = 1;
-	   for (var i = 0; i < explainer.length; i++) {
-		   // TODO: need to give x value as input
-		  dataset = data.map(function(d) { return  [d[item], d[genre], d[predicate], d[explainer[i]]]; });
-		  // sort
-		  // TODO: need to assign id for them
-		  dataset.sort(compare);
-		  max = Number(dataset[dataset.length-1][3]);
-		  min = Number(dataset[0][3]);
-		  h1 = max - min;
-		  h2 = height * 30;
-		  // stack box and lines
-		  stackbox(svg, dataset, x_position, genreColor);
-		  // histogram
-		  histogramplot(svg, dataset, x_position, genreColor);
-		  // box
-		  boxdata(svg, dataset, x_position, pred);
-		  // clean up
-		  dataset = [];
-		  x_position += 530; // might need to adjust the value if user choose to not showing some of the plot
-	   }
-	} else {
-		//console.log("here");
-		pred = 0;
-	   for (var i = 0; i < explainer.length; i++) {
-		  dataset = data.map(function(d) { return  [d[item], d[genre], d[explainer[i]]]; });
-		  dataset.sort(compare);
-		  max = Number(dataset[dataset.length-1][2]);
-		  min = Number(dataset[0][2]);
-		  h1 = max - min;
-		  h2 = height * 30;
-		  // stack box and lines
-		  stackbox(svg, dataset, x_position, genreColor);
-		  // histogram
-		 /* histogramplot(svg, dataset, x_position, genreColor);
-		  // box
-		  boxdata(svg, dataset, x_position, pred);*/
-		  // clean up
-		  dataset = [];
-		  x_position += 530; // might need to adjust the value if user choose to not showing some of the plot
-	   }
+    var dataset = [];
+    var genreColor = {};
+    var dataValues = d3.values(data)[0];
+    var explainer = [];
+    var predicate = "";
+    var item = "";
+    var genre = "";
+    var pred = 0;
+    // know the indices of different column we want
+    var col_names = Object.keys(dataValues);
+    for(var i = 0; i < col_names.length; i++) {
+	    var str = col_names[i].toLowerCase();
+	    if (str === "predicate") {
+		    predicate = col_names[i];
+		    pred = 1;
+	    } else if (str === "item") {
+		    item = col_names[i];
+	    } else if (str === "genre") {
+		    genre = col_names[i];
+	    } else {		   
+		    explainer.push(col_names[i]);
+	    }
+    }
+    // get genre-color mapping
+    k = 0;
+    var genres = data.map(function(d) { return  d[genre]; });
+    for (var j = 0; j < genres.length; j++) {
+	    if (!(genres[j] in genreColor)) {
+	 	   genreColor[genres[j]] = colors[k];
+	 	   k++;
+	    }
+    }
+
+    var x_position = 0;
+    for (var i = 0; i < explainer.length; i++) {
+	 	    if (predicate !== "") {
+			    dataset = data.map(function(d,idx) { return  [d[item], d[genre], d[predicate], d[explainer[i]], "d" + idx]; });
+		    } else {
+			    dataset = data.map(function(d,idx) { return  [d[item], d[genre], d[explainer[i]], "d" + idx]; });
+		    }
+
+		    last = dataset[0].length - 2;
+		    dataset.sort(compare);
+		    max = Number(dataset[dataset.length-1][last]);
+		    min = Number(dataset[0][last]);
+		    h1 = max - min;
+		    h2 = Math.ceil(dataset.length / Math.ceil(dataset.length / 30)) < 30 ? height *  Math.ceil(dataset.length / Math.ceil(dataset.length / 30) ): height * 30;
+		    // stack box and lines
+		    stackbox(svg, dataset, x_position, genreColor);
+		    // histogram
+		    var maxWidth = 500; // this should be a parameter
+		    x_position += Math.ceil(dataset.length / 30) * width + 100;
+		    histogramplot(svg, dataset, x_position, genreColor, maxWidth);
+		    // box
+		    x_position += maxWidth / 7 * 3; // assume max num is around half of the width
+		    boxdata(svg, dataset, x_position, pred);
+		    // clean up
+		    dataset = [];
+		    x_position += 80; // might need to adjust the value if user choose to not showing some of the plot
 	}
 });
