@@ -5,7 +5,8 @@ var diagonal = d3.svg.diagonal()
     .projection(function(d) { return [d.y, d.x]; });
 
 // might need to let user choose how many genres they have
-var colors = ["#8dd3c7","#ffffb3","#bebada","#fb8072"]; // if we only have 4 genres.
+// if we only have 4 genres.
+var colors = ["#8dd3c7","#ffffb3","#bebada","#fb8072"]; 
 
 // main svg canvas
 var svg = d3.select("svg"),
@@ -80,7 +81,9 @@ function stackbox(svg, dataset, x_position, genreColor) {
 		    y_new = (Number(dataset[j+k][last]) - min) / h1 * h2;
 	   
 	        var curveData = [
-			    {x:x_position+width*colsInRow,y:Math.floor(j/colsInRow)*height+0.5*height},
+			    {x:x_position+width*colsInRow,
+				 y:Math.floor(j/colsInRow)*height+0.5*height
+				},
 				{x:x_position+width*colsInRow+100,  y:y_new}
 			];
 		    svg.append("path")
@@ -212,14 +215,20 @@ function boxplot(svg, color, info, x_pos, h1, h2, max, min) {
 	   .attr("x1",x_pos+10)
 	   .attr("y1",h2 - ((info.max_val - max)/ (-h1) * h2))
 	   .attr("x2",x_pos+10)
-	   .attr("y2",h2 - ((info.max_val - max)/ (-h1) * h2) + Math.abs((info.max_val - info.Q3)/ h1 * h2))
+	   .attr("y2",
+	         h2 - ((info.max_val - max)/ (-h1) * h2)
+			 + Math.abs((info.max_val - info.Q3)/ h1 * h2)
+			)
 	   .attr("stroke-width", 1)
        .attr("stroke", "black")
 	svg.append("line")
 	   .attr("x1",x_pos+10)
 	   .attr("y1",h2 - ((info.Q1 - max)/ (-h1) * h2))
 	   .attr("x2",x_pos+10)
-	   .attr("y2",h2 - ((info.Q1 - max)/ (-h1) * h2) + Math.abs((info.Q1 - info.min_val)/ h1 * h2))
+	   .attr("y2",
+	         h2 - ((info.Q1 - max)/ (-h1) * h2)
+			 + Math.abs((info.Q1 - info.min_val)/ h1 * h2)
+			)
 	   .attr("stroke-width", 1)
        .attr("stroke", "black")
 }
@@ -232,7 +241,7 @@ function boxdata(svg, dataset,x_position, pred) {
 	for (var j = 0;j < dataset.length; j++) {
 		if (pred > 0) {
 			if (Number(dataset[j][2]) > 0) {
-			positive.push(dataset[j][last]);
+			    positive.push(dataset[j][last]);
 			} else {
 				negative.push(dataset[j][last]);
 			}
@@ -287,7 +296,7 @@ function boxdata(svg, dataset,x_position, pred) {
 
 // main function
 
-d3.csv("rca.csv", function(data) {
+d3.csv("00-comedies.csv", function(data) {
    // get column name
     var dataset = [];
     var genreColor = {};
@@ -324,29 +333,41 @@ d3.csv("rca.csv", function(data) {
 
     var x_position = 0;
     for (var i = 0; i < explainer.length; i++) {
-	 	    if (predicate !== "") {
-			    dataset = data.map(function(d,idx) { return  [d[item], d[genre], d[predicate], d[explainer[i]], "d" + idx]; });
-		    } else {
-			    dataset = data.map(function(d,idx) { return  [d[item], d[genre], d[explainer[i]], "d" + idx]; });
-		    }
+	 	if (predicate !== "") {
+		    dataset =
+			    data.map(function(d,idx) { 
+			        return [d[item], 
+				            d[genre], 
+						    d[predicate],
+						    d[explainer[i]],
+						    "d" + idx];
+				});
+		} else {
+		    dataset = 
+			    data.map(function(d,idx) { 
+				    return  [d[item], d[genre], d[explainer[i]], "d" + idx];
+				});
+		}
 
-		    last = dataset[0].length - 2;
-		    dataset.sort(compare);
-		    max = Number(dataset[dataset.length-1][last]);
-		    min = Number(dataset[0][last]);
-		    h1 = max - min;
-		    h2 = Math.ceil(dataset.length / Math.ceil(dataset.length / 30)) < 30 ? height *  Math.ceil(dataset.length / Math.ceil(dataset.length / 30) ): height * 30;
-		    // stack box and lines
-		    stackbox(svg, dataset, x_position, genreColor);
-		    // histogram
-		    var maxWidth = 500; // this should be a parameter
-		    x_position += Math.ceil(dataset.length / 30) * width + 100;
-		    histogramplot(svg, dataset, x_position, genreColor, maxWidth);
-		    // box
-		    x_position += maxWidth / 7 * 3; // assume max num is around half of the width
-		    boxdata(svg, dataset, x_position, pred);
-		    // clean up
-		    dataset = [];
-		    x_position += 80; // might need to adjust the value if user choose to not showing some of the plot
+		last = dataset[0].length - 2;
+		dataset.sort(compare);
+		max = Number(dataset[dataset.length-1][last]);
+		min = Number(dataset[0][last]);
+		h1 = max - min;
+		data_height = Math.ceil(dataset.length / Math.ceil(dataset.length / 30));
+		h2 = data_height < 30 ? 
+			 height * data_height: height * 30;
+		// stack box and lines
+		stackbox(svg, dataset, x_position, genreColor);
+		// histogram
+		var maxWidth = 500; // this should be a parameter
+		x_position += Math.ceil(dataset.length / 30) * width + 100;
+		histogramplot(svg, dataset, x_position, genreColor, maxWidth);
+		// box
+		x_position += maxWidth / 7 * 3; // assume max num is around half of the width
+		boxdata(svg, dataset, x_position, pred);
+		// clean up
+		dataset = [];
+		x_position += 80; // might need to adjust the value if user choose to not showing some of the plot
 	}
 });
