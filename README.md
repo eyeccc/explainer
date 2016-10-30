@@ -20,6 +20,8 @@ colors).
 Please pre-allocate a svg canvas with enough space for your data. 
 Then, type `explainer(yourCSVFileName)` in your javascript code.
 
+Please see `explainer_prac.html` for simple example.
+
 ## Note
 1. The number of bins in the histogram is calculated by `sqrt(N-1)-1`, where
 N is the number of data in the file.
