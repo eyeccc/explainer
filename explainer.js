@@ -1,7 +1,18 @@
 (function(window){
     'use strict';
     function define_library(){
-        var explainer = {};
+		var explainer = function explainer() {
+			//this.abc = 123;
+			this.svgW = 0;
+			this.svgH = 0;
+			this.binNum = 0;
+			this.isCustomBinNum = false;
+			this.pathVisibility = true;
+			this.histVisibility = true;
+			this.boxplotVisibility = true;
+			this.filename = "";
+		}
+        //var explainer = {};
 		// helper function to draw lines/paths
 		var diagonal = d3.svg.diagonal()
 			.source(function(d) {return {"x":d[0].y, "y":d[0].x}; })            
@@ -25,44 +36,36 @@
 		];
 		
 		// Let user define genre colors, size must be >= number of genres
-		explainer.setColors = function(arr) {
+		/*explainer.prototype.setColors = function(arr) {
 			this.colors = arr;
+		}*/
+
+		explainer.prototype.appendSVG = function(w, h) {
+			this.svgW = w;
+			this.svgH = h;
 		}
 		
-		explainer.appendSVG = function(w, h) {
-			d3.select("body")
-			  .append("svg")
-			  .attr("width", w)
-			  .attr("height", h);
-			explainer.svg = d3.select("svg");
-		}
-		
-		// default visibility
-		explainer.pathVisibility = true;
-		explainer.histVisibility = true;
-		explainer.boxplotVisibility = true;
-		
-		explainer.setPathInvisible = function() {
+		explainer.prototype.setPathInvisible = function() {
 			this.pathVisibility = false;
 		}
 		
-		explainer.setHistInvisible = function() {
+		explainer.prototype.setHistInvisible = function() {
 			this.histVisibility = false;
 		}
 		
-		explainer.setBoxplotInvisible = function() {
+		explainer.prototype.setBoxplotInvisible = function() {
 			this.boxplotVisibility = false;
 		}
 		
-		//explainer.binNum = 7;
-		explainer.filename = "";
-		explainer.setCSV = function(name) {
+		explainer.prototype.setCSV = function(name) {
 			this.filename = name;
-			//this.binNum = 
 		}
 		
-		
-		
+		explainer.prototype.setHistBinNum = function(num) {
+			this.binNum = num;
+			this.isCustomBinNum = true;
+		}
+
 		// box size for each element
 		var height = 20;
 		var width = 20;
@@ -92,7 +95,16 @@
 			return copy;
 		}
 		
-		function stackbox(svg, dataset, x_position, genreColor, min, max, h1, h2) {
+		function stackbox(
+			svg,
+			dataset,
+			x_position,
+			genreColor,
+			min,
+			max,
+			h1,
+			h2
+		) {
 			var last = dataset[0].length - 2;
 			var colsInRow = Math.ceil(dataset.length / 30); // max rows = 30
 			for(var j = 0; j < dataset.length; j++) {
@@ -177,9 +189,23 @@
 		   }
 		}
 		
-		function histogramplot(svg, dataset, x_position, genreColor, maxWidth, min, max, h1, h2) {
+		function histogramplot(
+			svg,
+			dataset,
+			x_position,
+			genreColor,
+			maxWidth,
+			min,
+			max,
+			h1,
+			h2,
+			isSetBin,
+			inputBinNum
+		) {
 			var box_w = maxWidth / dataset.length;
-			var bin_num = Math.floor(Math.sqrt(dataset.length-1)-1);
+			var bin_num = isSetBin
+				? inputBinNum
+				: Math.floor(Math.sqrt(dataset.length-1)-1);
 			// bottom axis of the histogram
 			svg.append("line")
 			   .attr("x1",x_position)
@@ -280,7 +306,7 @@
 			   .attr("stroke", "black")
 		}
 
-		function boxdata(svg, dataset,x_position, pred, min, max, h1, h2) {
+		function boxdata(svg, dataset,x_pos, pred, min, max, h1, h2) {
 			var positive = [];
 			var negative = [];
 			var all_val = [];
@@ -307,7 +333,7 @@
 					Q1: p1[Math.floor(p1.length * 3 / 4)],
 					min_val: p1[p1.length - 1],
 				};
-				boxplot(svg, explainer.colors[0], p_info, x_position+65, h1, h2, max, min);
+				boxplot(svg, explainer.colors[0], p_info, x_pos+65, h1, h2, max, min);
 				var n_info = {
 					max_val: n1[0],
 					Q3: n1[Math.floor(n1.length * 1 / 4)],
@@ -315,7 +341,7 @@
 					Q1: n1[Math.floor(n1.length * 3 / 4)],
 					min_val: n1[n1.length -1],
 				};
-				boxplot(svg, explainer.colors[2], n_info, x_position+35, h1, h2, max, min);
+				boxplot(svg, explainer.colors[2], n_info, x_pos+35, h1, h2, max, min);
 			}
 			
 			var a1 = all_val.map(Number);
@@ -326,10 +352,19 @@
 				Q1: a1[Math.floor(a1.length * 3 / 4)],
 				min_val: a1[a1.length -1],
 			};
-			boxplot(svg, explainer.colors[1], a_info, x_position+5, h1, h2, max, min);
+			boxplot(svg, explainer.colors[1], a_info, x_pos+5, h1, h2, max, min);
 		}
 		
-		explainer.draw = function () {
+		explainer.prototype.draw = function () {
+			// since we cannot read 'this' inside d3.csv
+			var svg = d3.select("body")
+						.append("svg")
+						.attr("width", this.svgW)
+						.attr("height", this.svgH);
+			var isBinNumSet = this.isCustomBinNum;
+			var binNumC = this.binNum;
+			var histVisibility = this.histVisibility;
+			var boxplotVisibility = this.boxplotVisibility;
 			d3.csv(this.filename, function(data) {
 			   // get column name
 				var dataset = [];
@@ -379,7 +414,7 @@
 					} else {
 						dataset = 
 							data.map(function(d,idx) { 
-								return  [d[item], d[genre], d[exp[i]], "d" + idx];
+								return [d[item], d[genre], d[exp[i]], "d" + idx];
 							});
 					}
 
@@ -393,36 +428,34 @@
 					var h2 = data_height < 30 ? 
 						 height * data_height: height * 30;
 					// stack box and lines
-					stackbox(explainer.svg, dataset, x_position, genreColor, min, max, h1, h2);
+					stackbox(svg, dataset, x_position, genreColor, min, max, h1, h2);
 					x_position += Math.ceil(dataset.length / 30) * width + 100;
 					// histogram
-					if (explainer.histVisibility) {
+					if (histVisibility) {
 						var maxWidth = 400; // this should be a parameter
-						var bin_num = Math.floor(Math.sqrt(dataset.length-1)-1);
-						histogramplot(explainer.svg, dataset, x_position, genreColor, maxWidth, min, max, h1, h2);
+						var bin_num = isBinNumSet
+							? binNumC 
+							: Math.floor(Math.sqrt(dataset.length-1)-1);
+						histogramplot(
+							svg, dataset, x_position, genreColor, maxWidth,
+							min, max, h1, h2, isBinNumSet, binNumC
+						);
+						// assume max num is around half of the width
 						x_position += maxWidth / (bin_num * 0.3); 
 					}
 					
 					// box
-					// assume max num is around half of the width
-					if (explainer.boxplotVisibility) {
-						boxdata(explainer.svg, dataset, x_position, pred, min, max, h1, h2);
+					if (boxplotVisibility) {
+						boxdata(svg, dataset, x_position, pred, min, max, h1, h2);
 						x_position += 80;
 					}
 					
 					// clean up
 					dataset = [];
-					// might need to adjust the value 
-					// if user choose to not showing some of the plot
-					 
 				}
 			});
 		}
 		
-		
-		
-		
-        
         return explainer;
     }
     //define globally if it doesn't already exist

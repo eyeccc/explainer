@@ -5,9 +5,15 @@
 <script src="explainer.js"></script>
 <body></body>
 <script>
- //explainer("rca.csv");
- explainer.appendSVG(2000,600);
- explainer.setCSV("rca.csv");
- explainer.setBoxplotInvisible();
- explainer.draw();
+ var b = new explainer();
+ b.appendSVG(2000,600);
+ b.setCSV("rca.csv");
+ b.setHistBinNum(7);
+ b.setBoxplotInvisible();
+ b.draw();
+ 
+ var a = new explainer();
+ a.appendSVG(800,400);
+ a.setCSV("00-comedies.csv");
+ a.draw();
 </script>
