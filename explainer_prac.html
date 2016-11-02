@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<svg width="2000" height="600"></svg>
+<!--svg width="2000" height="600"></svg-->
 <script src="d3.js"></script>
 <script src="explainer.js"></script>
+<body></body>
 <script>
- explainer("rca.csv");
+ //explainer("rca.csv");
+ explainer.appendSVG(2000,600);
+ explainer.setCSV("rca.csv");
+ explainer.draw();
 </script>
