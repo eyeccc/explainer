@@ -394,20 +394,27 @@
 						 height * data_height: height * 30;
 					// stack box and lines
 					stackbox(explainer.svg, dataset, x_position, genreColor, min, max, h1, h2);
-					// histogram
-					var maxWidth = 400; // this should be a parameter
-					var bin_num = Math.floor(Math.sqrt(dataset.length-1)-1);
 					x_position += Math.ceil(dataset.length / 30) * width + 100;
-					histogramplot(explainer.svg, dataset, x_position, genreColor, maxWidth, min, max, h1, h2);
+					// histogram
+					if (explainer.histVisibility) {
+						var maxWidth = 400; // this should be a parameter
+						var bin_num = Math.floor(Math.sqrt(dataset.length-1)-1);
+						histogramplot(explainer.svg, dataset, x_position, genreColor, maxWidth, min, max, h1, h2);
+						x_position += maxWidth / (bin_num * 0.3); 
+					}
+					
 					// box
 					// assume max num is around half of the width
-					x_position += maxWidth / (bin_num * 0.3); 
-					boxdata(explainer.svg, dataset, x_position, pred, min, max, h1, h2);
+					if (explainer.boxplotVisibility) {
+						boxdata(explainer.svg, dataset, x_position, pred, min, max, h1, h2);
+						x_position += 80;
+					}
+					
 					// clean up
 					dataset = [];
 					// might need to adjust the value 
 					// if user choose to not showing some of the plot
-					x_position += 80; 
+					 
 				}
 			});
 		}
