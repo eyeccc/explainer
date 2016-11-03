@@ -17,7 +17,7 @@ This could support at most 12 genres in the data (due to the restriction of
 colors).
 
 ## Usage
-Please make sure to have <body> in your html file.
+Please make sure to have `<body>` in your html file.
 
 ```
 var obj1 = new explainer();
