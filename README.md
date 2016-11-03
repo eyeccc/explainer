@@ -25,7 +25,7 @@ obj1.setPathInvisible(); // there won't be lines between small boxes and histogr
 obj1.setBoxplotInvisible(); // there won't be box plot
 obj1.setHistInvisible(); // there won't be histogram
 obj1.setCSV("heyImCSVfile.csv"); // your csv file
-obj1.appendSVG(500,300); // append a svg canvas with width = 500, height = 300
+obj1.setSVGSize(500,300); // append a svg canvas with width = 500, height = 300
 obj1.setHistBinNum(20); // set number of histogram bins as 20
 
 // please set all your preference before drawing
