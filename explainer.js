@@ -35,7 +35,7 @@
 			"#ffed6f"
 		];
 
-		explainer.prototype.appendSVG = function(w, h) {
+		explainer.prototype.setSVGSize = function(w, h) {
 			this.svgW = w;
 			this.svgH = h;
 		}
