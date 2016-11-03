@@ -45,9 +45,9 @@
 			this.svgH = h;
 		}
 		
-		explainer.prototype.setPathInvisible = function() {
+		/*explainer.prototype.setPathInvisible = function() {
 			this.pathVisibility = false;
-		}
+		}*/
 		
 		explainer.prototype.setHistInvisible = function() {
 			this.histVisibility = false;
