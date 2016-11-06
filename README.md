@@ -27,6 +27,8 @@ obj1.setHistInvisible(); // there won't be histogram
 obj1.setCSV("heyImCSVfile.csv"); // your csv file
 obj1.setSVGSize(500,300); // append a svg canvas with width = 500, height = 300
 obj1.setHistBinNum(20); // set number of histogram bins as 20
+obj1.setGenreBoxplotInvisible(); // boxplot by genre will not show up
+obj1.setMaxRows(5); // the max number of rows for the stacked boxes will be 5
 
 // please set all your preference before drawing
 obj1.draw();
@@ -40,6 +42,13 @@ Please see `explainer_prac.html` for simple example.
 N is the number of data in the file.
 
 2. Default svg size is width = 100 and height = 100.
+
+3. Default max row number is 30.
+
+4. Different object will create different SVG canvas.
+
+5. If there is predicate, for the box plots green (`#a1d76a`) will be positive,
+pink (`#e9a3c9`) for negative, and white (`#f7f7f7`) for all.
 
 ## Demo
 ![ScreenShot](https://github.com/eyeccc/explainer/blob/master/explainer.png)
