@@ -17,24 +17,32 @@ This could support at most 12 genres in the data (due to the restriction of
 colors).
 
 ## Usage
-Please make sure to have `<body>` in your html file.
+Please include d3.js and explainer.js and 
+make sure to have `<body>` or `<svg>` in your html file.
 
-```
-var obj1 = new explainer();
-obj1.setPathInvisible(); // there won't be lines between small boxes and histogram
-obj1.setBoxplotInvisible(); // there won't be box plot
-obj1.setHistInvisible(); // there won't be histogram
-obj1.setCSV("heyImCSVfile.csv"); // your csv file
-obj1.setSVGSize(500,300); // append a svg canvas with width = 500, height = 300, only work when we create a new SVG
-obj1.unsetNewSVG(); // use existing svg instead of creating a new one
-obj1.setHistBinNum(20); // set number of histogram bins as 20
-obj1.setGenreBoxplotInvisible(); // boxplot by genre will not show up
-obj1.setMaxRows(5); // the max number of rows for the stacked boxes will be 5
+`setPathInvisible()` : set the lines between small boxes and histogram invisible
 
-// please set all your preference before drawing
-obj1.draw();
+`setBoxplotInvisible()`: set box plot invisible
 
-```
+`setHistInvisible()` : set histogram invisible
+
+`setCSV("heyImCSVfile.csv")` : set the input csv file name
+
+`setSVGSize(width,height)` : set the size of new SVG if you would like to create one
+
+`unsetNewSVG()` : use existing svg instead of creating a new one
+
+`setHistBinNum(number)` : set number of histogram bins
+
+`setGenreBoxplotInvisible()` : set boxplot of each genre invisible
+
+`setMaxRows(number)`: set max number of rows for the stacked boxes
+
+`setStartingCoord(x_position, y_position)` : set the starting point to draw
+
+Please set all your preference before drawing
+
+`draw()` : draw everything
 
 Please see `explainer_prac.html` for simple example.
 
