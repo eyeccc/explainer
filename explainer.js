@@ -12,6 +12,7 @@
 			this.boxplotVisibility = true;
 			this.genreBoxplotVisibility = true;
 			this.filename = "";
+			this.createSVG = true;
 		}
 
 		// helper function to draw lines/paths
@@ -39,6 +40,10 @@
 		explainer.prototype.setSVGSize = function(w, h) {
 			this.svgW = w;
 			this.svgH = h;
+		}
+		
+		explainer.prototype.unsetNewSVG = function(w, h) {
+			this.createSVG = false;
 		}
 		
 		explainer.prototype.setMaxRows = function(n) {
@@ -422,10 +427,12 @@
 		explainer.prototype.draw = function () {
 			// since we cannot read 'this' inside d3.csv
 			// TODO: should separate d3.csv and other function
-			var svg = d3.select("body")
-						.append("svg")
-						.attr("width", this.svgW)
-						.attr("height", this.svgH);
+			var svg = this.createSVG 
+				? d3.select("body")
+					.append("svg")
+					.attr("width", this.svgW)
+					.attr("height", this.svgH)
+				: d3.select("svg");
 			var isBinNumSet = this.isCustomBinNum;
 			var binNumC = this.binNum;
 			var histVisibility = this.histVisibility;
