@@ -6,6 +6,8 @@
 			this.svgH = 100;
 			this.binNum = 0;
 			this.rows = 30;
+			this.xpos = 0;
+			this.ypos = 0;
 			this.isCustomBinNum = false;
 			this.pathVisibility = true;
 			this.histVisibility = true;
@@ -40,6 +42,11 @@
 		explainer.prototype.setSVGSize = function(w, h) {
 			this.svgW = w;
 			this.svgH = h;
+		}
+		
+		explainer.prototype.setStartingCoord = function(x,y) {
+			this.xpos = x;
+			this.ypos = y;
 		}
 		
 		explainer.prototype.unsetNewSVG = function(w, h) {
@@ -108,6 +115,7 @@
 			svg,
 			dataset,
 			x_position,
+			y_pos,
 			genreColor,
 			min,
 			max,
@@ -133,7 +141,7 @@
 					   .attr("stroke","black")
 					   .attr("class", cname)
 					   .attr("x",x_position + k*width)
-					   .attr("y",Math.floor(j/colsInRow)*height)
+					   .attr("y",y_pos+Math.floor(j/colsInRow)*height)
 					   .attr("rx",5)
 					   .attr("ry",5)
 					   .on("mouseover", function() {
@@ -166,9 +174,9 @@
 						lineSet = 1;
 						var curveData = [
 							{x:x_position+width*colsInRow,
-							 y:Math.floor(j/colsInRow)*height+0.5*height
+							 y:y_pos+Math.floor(j/colsInRow)*height+0.5*height
 							},
-							{x:x_position+width*colsInRow+100,  y:y_new}
+							{x:x_position+width*colsInRow+100,  y:y_pos+y_new}
 						];
 						svg.append("path")
 						   .datum(curveData)
@@ -182,19 +190,19 @@
 					// tooltip to show item name
 					svg.append("rect")
 					   .attr("height",18)
-					   .attr("width",dataset[j+k][0].length * 8)
+					   .attr("width",dataset[j+k][0].length * 8) // should fix this
 					   .attr("fill","#e3e7ed")
 					   .attr("rx",5)
 					   .attr("ry",5)
 					   .attr("class", "t" + cname)
 					   .attr("x",x_position + k*width + 10)
-					   .attr("y",Math.floor(j/colsInRow)*height+2 + 5)
+					   .attr("y",y_pos+Math.floor(j/colsInRow)*height+2 + 5)
 					   .style("opacity", 0.7)
 					   .style("visibility","hidden");
 					svg.append("text")
 					   .attr("class", "t" + cname)
 					   .attr("x",x_position + k*width + 5 + 10)
-					   .attr("y",15+Math.floor(j/colsInRow)*height + 5)
+					   .attr("y",y_pos+15+Math.floor(j/colsInRow)*height + 5)
 					   .text(dataset[j+k][0])
 					   .style("font-size","12px")
 					   .style("visibility","hidden");
@@ -208,6 +216,7 @@
 			svg,
 			dataset,
 			x_position,
+			y_pos,
 			genreColor,
 			maxWidth,
 			min,
@@ -224,9 +233,9 @@
 			// bottom axis of the histogram
 			svg.append("line")
 			   .attr("x1",x_position)
-			   .attr("y1",0)
+			   .attr("y1",y_pos+0)
 			   .attr("x2",x_position)
-			   .attr("y2",h2)
+			   .attr("y2",y_pos+h2)
 			   .attr("stroke-width", 1)
 			   .attr("stroke", "black")
 			// num of bins, might need to change it to user input
@@ -257,7 +266,7 @@
 					for(var prop in st) {
 						svg.append("rect")
 						   .attr("x", x_position + u*box_w) 
-						   .attr("y", (bin_num-(count))*box_h)
+						   .attr("y", y_pos+(bin_num-(count))*box_h)
 						   .attr("width", st[prop]*box_w)
 						   .attr("height", box_h)
 						   .attr("stroke","black")
@@ -278,51 +287,51 @@
 			return x_position + maxNum * box_w + 10;
 		}
 
-		function boxplot(svg, color, info, x_pos, h1, h2, max, min) {
+		function boxplot(svg, color, info, x_pos, y_pos, h1, h2, max, min) {
 			svg.append("rect")
 			   .attr("height",Math.abs((info.Q3 - info.Q2)/ h1 * h2))
 			   .attr("width",20)
 			   .attr("fill",color)
 			   .attr("stroke","black")
 			   .attr("x",x_pos)
-			   .attr("y",h2 - ((info.Q3 - max)/ (-h1) * h2)) 
+			   .attr("y",y_pos+h2 - ((info.Q3 - max)/ (-h1) * h2)) 
 			svg.append("rect")
 			   .attr("height",Math.abs((info.Q2 - info.Q1)/ h1 * h2))
 			   .attr("width",20)
 			   .attr("fill",color)
 			   .attr("stroke","black")
 			   .attr("x",x_pos)
-			   .attr("y",h2 - ((info.Q2 - max)/ (-h1) * h2))
+			   .attr("y",y_pos+h2 - ((info.Q2 - max)/ (-h1) * h2))
 			svg.append("line")
 			   .attr("x1",x_pos)
-			   .attr("y1",h2 - ((info.min_val - max)/ (-h1) * h2))
+			   .attr("y1",y_pos+h2 - ((info.min_val - max)/ (-h1) * h2))
 			   .attr("x2",x_pos + 20)
-			   .attr("y2",h2 - ((info.min_val - max)/ (-h1) * h2))
+			   .attr("y2",y_pos+h2 - ((info.min_val - max)/ (-h1) * h2))
 			   .attr("stroke-width", 1)
 			   .attr("stroke", "black")
 			svg.append("line")
 			   .attr("x1",x_pos)
-			   .attr("y1",h2-((info.max_val - max)/ (-h1) * h2))
+			   .attr("y1",y_pos+h2-((info.max_val - max)/ (-h1) * h2))
 			   .attr("x2",x_pos+20)
-			   .attr("y2",h2-((info.max_val - max)/ (-h1) * h2))
+			   .attr("y2",y_pos+h2-((info.max_val - max)/ (-h1) * h2))
 			   .attr("stroke-width", 1)
 			   .attr("stroke", "black")
 			svg.append("line")
 			   .attr("x1",x_pos+10)
-			   .attr("y1",h2 - ((info.max_val - max)/ (-h1) * h2))
+			   .attr("y1",y_pos+h2 - ((info.max_val - max)/ (-h1) * h2))
 			   .attr("x2",x_pos+10)
 			   .attr("y2",
-					 h2 - ((info.max_val - max)/ (-h1) * h2)
+					 y_pos+h2 - ((info.max_val - max)/ (-h1) * h2)
 					 + Math.abs((info.max_val - info.Q3)/ h1 * h2)
 					)
 			   .attr("stroke-width", 1)
 			   .attr("stroke", "black")
 			svg.append("line")
 			   .attr("x1",x_pos+10)
-			   .attr("y1",h2 - ((info.Q1 - max)/ (-h1) * h2))
+			   .attr("y1",y_pos+h2 - ((info.Q1 - max)/ (-h1) * h2))
 			   .attr("x2",x_pos+10)
 			   .attr("y2",
-					 h2 - ((info.Q1 - max)/ (-h1) * h2)
+					 y_pos+h2 - ((info.Q1 - max)/ (-h1) * h2)
 					 + Math.abs((info.Q1 - info.min_val)/ h1 * h2)
 					)
 			   .attr("stroke-width", 1)
@@ -333,6 +342,7 @@
 			svg, 
 			dataset,
 			x_pos, 
+			y_pos,
 			pred, 
 			min, 
 			max, 
@@ -379,7 +389,7 @@
 						Q1: tmp[Math.floor(tmp.length * 3 / 4)],
 						min_val: tmp[tmp.length -1],
 					};
-					boxplot(svg, colors[m], info, x_pos+5, h1, h2, max, min);
+					boxplot(svg, colors[m], info, x_pos+5, y_pos, h1, h2, max, min);
 					x_pos += 30;
 				}
 				// to separate genres and aggregated boxplot
@@ -398,7 +408,7 @@
 					Q1: p1[Math.floor(p1.length * 3 / 4)],
 					min_val: p1[p1.length - 1],
 				};
-				boxplot(svg, "#a1d76a", p_info, x_pos, h1, h2, max, min);
+				boxplot(svg, "#a1d76a", p_info, x_pos, y_pos, h1, h2, max, min);
 				x_pos += 30;
 				var n_info = {
 					max_val: n1[0],
@@ -407,7 +417,7 @@
 					Q1: n1[Math.floor(n1.length * 3 / 4)],
 					min_val: n1[n1.length -1],
 				};
-				boxplot(svg, "#e9a3c9", n_info, x_pos, h1, h2, max, min);
+				boxplot(svg, "#e9a3c9", n_info, x_pos, y_pos, h1, h2, max, min);
 				x_pos += 30;
 			}
 			
@@ -419,7 +429,7 @@
 				Q1: a1[Math.floor(a1.length * 3 / 4)],
 				min_val: a1[a1.length -1],
 			};
-			boxplot(svg, "#f7f7f7", a_info, x_pos, h1, h2, max, min);
+			boxplot(svg, "#f7f7f7", a_info, x_pos, y_pos, h1, h2, max, min);
 			x_pos += 30;
 			return x_pos;
 		}
@@ -440,6 +450,8 @@
 			var genreBoxplotVisibility = this.genreBoxplotVisibility;
 			var pathVisibility = this.pathVisibility;
 			var maxRows = this.rows;
+			var x_position = this.xpos;
+			var y_position = this.ypos;
 			d3.csv(this.filename, function(data) {
 			   // get column name
 				var dataset = [];
@@ -475,7 +487,7 @@
 					}
 				}
 
-				var x_position = 0;
+				
 				for (var i = 0; i < exp.length; i++) {
 					if (predicate !== "") {
 						dataset =
@@ -506,7 +518,7 @@
 						 height * data_height: height * maxRows;
 					// stack box and lines
 					x_position = stackbox(
-						svg, dataset, x_position,
+						svg, dataset, x_position, y_position,
 						genreColor, min, max, h1, h2, 
 						pathVisibility, maxRows
 					);
@@ -518,15 +530,17 @@
 							? binNumC 
 							: Math.floor(Math.sqrt(dataset.length-1)-1);
 						x_position = histogramplot(
-							svg, dataset, x_position, genreColor, maxWidth,
-							min, max, h1, h2, isBinNumSet, binNumC
+							svg, dataset, x_position, y_position,
+							genreColor, maxWidth, min, max, h1, h2, 
+							isBinNumSet, binNumC
 						);
 					}
 					
 					// box
 					if (boxplotVisibility) {
 						x_position = boxdata(
-							svg, dataset, x_position, pred, min, max, 
+							svg, dataset, x_position, y_position, 
+							pred, min, max, 
 							h1, h2, genreColor, k, // number of genre
 							genreBoxplotVisibility
 						);
