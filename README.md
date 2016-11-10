@@ -1,21 +1,6 @@
 # explainer
 implement explainer: http://graphics.cs.wisc.edu/Vis/Explainers/
 
-## Input csv restriction
-The expected input should have a name, a category, a predicate (optional), 
-and multiple columns of explainer values.
-
-Column name must be: 
-- "item" (for name)
-- "genre" (for category)
-- "predicate" (for predicate)
-- any names for explainer values
-
-Uppercase / lowercase does not matter.
-
-This could support at most 12 genres in the data (due to the restriction of
-colors).
-
 ## Usage
 Please include d3.js and explainer.js and 
 make sure to have `<body>` or `<svg>` in your html file.
@@ -32,7 +17,7 @@ make sure to have `<body>` or `<svg>` in your html file.
 
 `setGenreColName("yourGenre")`: set the genre column name
 
-`setExplainerColNames(["P1","P2"])` : set the explainer values column names
+`setExplainerColNames(["P1","P2"])` : set column names of explainer values with array of string 
 
 `setSVGSize(width,height)` : set the size of new SVG if you would like to create one
 
@@ -64,6 +49,9 @@ N is the number of data in the file.
 
 5. If there is predicate, for the box plots green (`#a1d76a`) will be positive,
 pink (`#e9a3c9`) for negative, and white (`#f7f7f7`) for all.
+
+6. This could support at most 12 genres in the data (due to the restriction of
+colors).
 
 ## Demo
 ![ScreenShot](https://github.com/eyeccc/explainer/blob/master/explainer.png)
