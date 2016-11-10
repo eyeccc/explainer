@@ -5,19 +5,21 @@ implement explainer: http://graphics.cs.wisc.edu/Vis/Explainers/
 Please include d3.js and explainer.js and 
 make sure to have `<body>` or `<svg>` in your html file.
 
+**REQUIRED** `setCSV("heyImCSVfile.csv")` : set the input csv file name
+
+**REQUIRED**`setItemColName("yourTitle")` : set the item / title column name
+
+**REQUIRED**`setGenreColName("yourGenre")`: set the genre column name
+
+**REQUIRED**`setExplainerColNames(["P1","P2"])` : set column names of explainer values with array of string
+
+`setPredicateColName("yourPredicate")`: set the predicate column name
+
 `setPathInvisible()` : set the lines between small boxes and histogram invisible
 
 `setBoxplotInvisible()`: set box plot invisible
 
 `setHistInvisible()` : set histogram invisible
-
-`setCSV("heyImCSVfile.csv")` : set the input csv file name
-
-`setItemColName("yourTitle")` : set the item / title column name
-
-`setGenreColName("yourGenre")`: set the genre column name
-
-`setExplainerColNames(["P1","P2"])` : set column names of explainer values with array of string 
 
 `setSVGSize(width,height)` : set the size of new SVG if you would like to create one
 
