@@ -15,6 +15,10 @@
 			this.genreBoxplotVisibility = true;
 			this.filename = "";
 			this.createSVG = true;
+			this.itemColName = "";
+			this.genreColName = "";
+			this.predicateColName = "";
+			this.explainerColNames = [];
 		}
 
 		// helper function to draw lines/paths
@@ -42,6 +46,22 @@
 		explainer.prototype.setSVGSize = function(w, h) {
 			this.svgW = w;
 			this.svgH = h;
+		}
+		
+		explainer.prototype.setItemColName = function(name) {
+			this.itemColName = name;
+		}
+		
+		explainer.prototype.setGenreColName = function(name) {
+			this.genreColName = name;
+		}
+		
+		explainer.prototype.setPredicateColName = function(name) {
+			this.predicateColName = name;
+		}
+		
+		explainer.prototype.setExplainerColNames = function(nameArr) {
+			this.explainerColNames = nameArr;
 		}
 		
 		explainer.prototype.setStartingCoord = function(x,y) {
@@ -452,31 +472,17 @@
 			var maxRows = this.rows;
 			var x_position = this.xpos;
 			var y_position = this.ypos;
+			var exp = this.explainerColNames;
+			var predicate = this.predicateColName;
+			var item = this.itemColName;
+			var genre = this.genreColName;
+			var pred = predicate !== "" ? 1 : 0;
 			d3.csv(this.filename, function(data) {
 			   // get column name
 				var dataset = [];
 				var genreColor = {};
 				var dataValues = d3.values(data)[0];
-				var exp = [];
-				var predicate = "";
-				var item = "";
-				var genre = "";
-				var pred = 0;
-				// know the indices of different column we want
-				var col_names = Object.keys(dataValues);
-				for(var i = 0; i < col_names.length; i++) {
-					var str = col_names[i].toLowerCase();
-					if (str === "predicate") {
-						predicate = col_names[i];
-						pred = 1;
-					} else if (str === "item") {
-						item = col_names[i];
-					} else if (str === "genre") {
-						genre = col_names[i];
-					} else {		   
-						exp.push(col_names[i]);
-					}
-				}
+				
 				// get genre-color mapping
 				var k = 0; // number of genre
 				var genres = data.map(function(d) { return  d[genre]; });
@@ -487,9 +493,8 @@
 					}
 				}
 
-				
 				for (var i = 0; i < exp.length; i++) {
-					if (predicate !== "") {
+					if (pred == 1) {
 						dataset =
 							data.map(function(d,idx) { 
 								return [d[item], 

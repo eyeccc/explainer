@@ -28,6 +28,12 @@ make sure to have `<body>` or `<svg>` in your html file.
 
 `setCSV("heyImCSVfile.csv")` : set the input csv file name
 
+`setItemColName("yourTitle")` : set the item / title column name
+
+`setGenreColName("yourGenre")`: set the genre column name
+
+`setExplainerColNames(["P1","P2"])` : set the explainer values column names
+
 `setSVGSize(width,height)` : set the size of new SVG if you would like to create one
 
 `unsetNewSVG()` : use existing svg instead of creating a new one

@@ -7,10 +7,13 @@
 <script>
  var b = new explainer();
  b.setSVGSize(2000,600);
- b.setCSV("rca.csv");
+ b.setCSV("exp0.csv");
+ b.setItemColName("Title");
+ b.setGenreColName("Genre");
+ b.setExplainerColNames(["P1","P2"]);
  b.setHistBinNum(7);
- b.setHistInvisible();
- b.setPathInvisible();
+ //b.setHistInvisible();
+ //b.setPathInvisible();
  b.draw();
  var a = new explainer();
  a.setSVGSize(800,800);
