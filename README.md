@@ -5,13 +5,13 @@ implement explainer: http://graphics.cs.wisc.edu/Vis/Explainers/
 Please include d3.js and explainer.js and 
 make sure to have `<body>` or `<svg>` in your html file.
 
-**REQUIRED** `setCSV("heyImCSVfile.csv")` : set the input csv file name
+`setCSV("heyImCSVfile.csv")` : set the input csv file name (**REQUIRED**)
 
-**REQUIRED**`setItemColName("yourTitle")` : set the item / title column name
+`setItemColName("yourTitle")` : set the item / title column name (**REQUIRED**)
 
-**REQUIRED**`setGenreColName("yourGenre")`: set the genre column name
+`setGenreColName("yourGenre")`: set the genre column name (**REQUIRED**)
 
-**REQUIRED**`setExplainerColNames(["P1","P2"])` : set column names of explainer values with array of string
+`setExplainerColNames(["P1","P2"])` : set column names of explainer values with array of string (**REQUIRED**)
 
 `setPredicateColName("yourPredicate")`: set the predicate column name
 
@@ -33,7 +33,7 @@ make sure to have `<body>` or `<svg>` in your html file.
 
 `setStartingCoord(x_position, y_position)` : set the starting point to draw
 
-Please set all your preference before drawing
+**Please set all your preference before drawing**
 
 `draw()` : draw everything
 
