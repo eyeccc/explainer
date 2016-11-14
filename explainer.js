@@ -19,6 +19,9 @@
 			this.genreColName = "";
 			this.predicateColName = "";
 			this.explainerColNames = [];
+			this.lines = [];
+			this.isSetLines = false;
+			this.lineVisibility = true;
 		}
 
 		// helper function to draw lines/paths
@@ -54,6 +57,18 @@
 		
 		explainer.prototype.setGenreColName = function(name) {
 			this.genreColName = name;
+		}
+		
+		explainer.prototype.setLines = function(linesArr) {
+			// expected input:
+			// if have multiple explainer values
+			// [["lineA1", "lineA2", "lineA3"], ["lineB1", "lineB2"]]
+			this.lines = linesArr;
+			this.isSetLines = true;
+		}
+		
+		explainer.prototype.setLinesInvisible = function() {
+			this.lineVisibility = false;
 		}
 		
 		explainer.prototype.setPredicateColName = function(name) {
@@ -477,6 +492,9 @@
 			var item = this.itemColName;
 			var genre = this.genreColName;
 			var pred = predicate !== "" ? 1 : 0;
+			var lines = this.isSetLines ? this.lines : [];
+			var lineVisibility = this.lineVisibility;
+
 			d3.csv(this.filename, function(data) {
 			   // get column name
 				var dataset = [];
@@ -494,6 +512,7 @@
 				}
 
 				for (var i = 0; i < exp.length; i++) {
+					var init_pos = x_position;
 					if (pred == 1) {
 						dataset =
 							data.map(function(d,idx) { 
@@ -549,6 +568,25 @@
 							h1, h2, genreColor, k, // number of genre
 							genreBoxplotVisibility
 						);
+					}
+					
+					if (lineVisibility) {
+						if (lines.length > 0) {
+							for (var q = 0; q < lines[i].length; q++) {
+								svg.append("text")
+									.attr("x",(init_pos + x_position)/2)
+									.attr("y",h2 + 20 + q*20)
+									.text(lines[i][q])
+									.style("font-size","12px");
+							}
+						} else {
+							svg.append("text")
+								.attr("x",(init_pos + x_position)/2)
+								.attr("y",h2 + 20)
+								.text("Explainer: " + exp[i])
+								.style("font-size","12px");
+						}
+						
 					}
 					
 					// clean up

@@ -15,6 +15,15 @@ make sure to have `<body>` or `<svg>` in your html file.
 
 `setPredicateColName("yourPredicate")`: set the predicate column name
 
+`setLines(linesArr)`: linesArr is an array with the following form:
+If you have 3 explainer values and would like to add footnote for each of them,
+please give an array with 3 array of strings inside. i.e., `[["lineA1", "lineA2", "lineA3"], ["lineB1", "lineB2"], ["lineC1", "lineC2"]]`.
+If you only want to add footnote for the first and the third figure, please still provide an empty array for the second figure. i.e., 
+`[["lineA1", "lineA2", "lineA3"], [], ["lineC1", "lineC2"]]`
+		
+`setLinesInvisible()` : the default footnotes would be the column name of the explainer value, 
+using this function could set it as invisible
+
 `setPathInvisible()` : set the lines between small boxes and histogram invisible
 
 `setBoxplotInvisible()`: set box plot invisible
