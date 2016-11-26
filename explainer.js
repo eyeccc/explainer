@@ -84,7 +84,7 @@
 			this.ypos = y;
 		}
 		
-		explainer.prototype.unsetNewSVG = function(w, h) {
+		explainer.prototype.unsetNewSVG = function() {
 			this.createSVG = false;
 		}
 		
@@ -326,14 +326,14 @@
 			svg.append("rect")
 			   .attr("height",Math.abs((info.Q3 - info.Q2)/ h1 * h2))
 			   .attr("width",20)
-			   .attr("fill",color)
+			   .style("fill",color)
 			   .attr("stroke","black")
 			   .attr("x",x_pos)
 			   .attr("y",y_pos+h2 - ((info.Q3 - max)/ (-h1) * h2)) 
 			svg.append("rect")
 			   .attr("height",Math.abs((info.Q2 - info.Q1)/ h1 * h2))
 			   .attr("width",20)
-			   .attr("fill",color)
+			   .style("fill",color)
 			   .attr("stroke","black")
 			   .attr("x",x_pos)
 			   .attr("y",y_pos+h2 - ((info.Q2 - max)/ (-h1) * h2))
@@ -443,7 +443,13 @@
 					Q1: p1[Math.floor(p1.length * 3 / 4)],
 					min_val: p1[p1.length - 1],
 				};
-				boxplot(svg, "#a1d76a", p_info, x_pos, y_pos, h1, h2, max, min);
+				var t1 = textures.circles()
+						.size(6)
+						.radius(2)
+						.fill("transparent")
+						.strokeWidth(1);
+				svg.call(t1);
+				boxplot(svg, t1.url(), p_info, x_pos, y_pos, h1, h2, max, min);
 				x_pos += 30;
 				var n_info = {
 					max_val: n1[0],
@@ -452,7 +458,13 @@
 					Q1: n1[Math.floor(n1.length * 3 / 4)],
 					min_val: n1[n1.length -1],
 				};
-				boxplot(svg, "#e9a3c9", n_info, x_pos, y_pos, h1, h2, max, min);
+				var t2 = textures.paths()
+						 .size(15)
+						 .d("crosses")
+						 .lighter()
+						 .thicker();
+				svg.call(t2);
+				boxplot(svg, t2.url(), n_info, x_pos, y_pos, h1, h2, max, min);
 				x_pos += 30;
 			}
 			
@@ -464,7 +476,9 @@
 				Q1: a1[Math.floor(a1.length * 3 / 4)],
 				min_val: a1[a1.length -1],
 			};
-			boxplot(svg, "#f7f7f7", a_info, x_pos, y_pos, h1, h2, max, min);
+			var t = textures.lines();
+			svg.call(t);
+			boxplot(svg, t.url(), a_info, x_pos, y_pos, h1, h2, max, min);
 			x_pos += 30;
 			return x_pos;
 		}

@@ -2,17 +2,19 @@
 <meta charset="utf-8">
 <!--svg width="2000" height="600"></svg-->
 <script src="d3.js"></script>
+<script src="texture.js"></script>
 <script src="explainer.js"></script>
 <body></body>
 <script>
  var b = new explainer();
  b.setSVGSize(2000,700);
- b.setCSV("exp0.csv");
- b.setItemColName("Title");
- b.setGenreColName("Genre");
- b.setExplainerColNames(["P1","P2"]);
+ b.setCSV("00-comedies.csv");
+ b.setItemColName("Item");
+ b.setGenreColName("genre");
+ b.setPredicateColName("predicate");
+ b.setExplainerColNames(["explainer1"]);
  b.setHistBinNum(7);
- b.setLines([["p1 line1", "p1 line2"],["p2 line1", "p2 line2", "p2 line3"]]);
+ b.setLines([["p1 line1", "p1 line2"]]);
  //b.setHistInvisible();
  //b.setPathInvisible();
  b.draw();

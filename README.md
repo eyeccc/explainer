@@ -1,6 +1,10 @@
 # explainer
 implement explainer: http://graphics.cs.wisc.edu/Vis/Explainers/
 
+# Dependency
+1. d3.js
+2. texture.js ( https://riccardoscalco.github.io/textures/ )
+
 ## Usage
 Please include d3.js and explainer.js and 
 make sure to have `<body>` or `<svg>` in your html file.
@@ -61,8 +65,7 @@ N is the number of data in the file.
 
 4. Different object will create different SVG canvas.
 
-5. If there is predicate, for the box plots green (`#a1d76a`) will be positive,
-pink (`#e9a3c9`) for negative, and white (`#f7f7f7`) for all.
+5. If there is predicate, the box plots will be filled by textures. "o" for positive, "x" for negative, and lines for all.
 
 6. This could support at most 12 genres in the data (due to the restriction of
 colors).
